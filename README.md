@@ -3,8 +3,6 @@
 > 🌐 **SIBILING** adalah aplikasi web yang dirancang untuk mendigitalisasi dan mengelola alur layanan bimbingan konseling di **Universitas Bina Bangsa Getsempena (UBBG)**.  
 > Dibuat untuk mahasiswa, dosen konselor, dosen pembimbing, dan admin agar alur konseling jadi lebih **efisien, transparan, dan modern**.
 
-![Preview Animasi](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjl3cTV2dGJ4c3pkczM0dHFna3RnZjM1Z3VvZmhhcHlvMnE4dWlqdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/uWlpPGquhGZNFzY90z/giphy.gif)
-
 ---
 
 ## 🚀 Tech Stack (Teknologi yang Digunakan)
@@ -93,3 +91,8 @@ Tabel utama meliputi:
 ---
 
 ✨ Dibangun dengan ❤️ oleh **Tim SIBILING - UBBG**
+
+---
+
+### 🐍 Animasi Ular (Game Snake)
+![Snake Can Be Completed](https://upload.wikimedia.org/wikipedia/commons/f/f8/Snake_can_be_completed.gif)
