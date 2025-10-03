@@ -1,15 +1,18 @@
 # 🎓 SIBILING UBBG - Sistem Informasi Bimbingan Konseling
 
-SIBILING adalah sebuah aplikasi web yang dirancang untuk mendigitalisasi dan mengelola alur layanan bimbingan konseling di Universitas Bina Bangsa Getsempena (UBBG). Aplikasi ini dibangun untuk memfasilitasi mahasiswa dalam mengajukan permohonan konseling, serta membantu para Dosen Konselor dan Dosen Pembimbing dalam mengelola dan memantau proses konseling secara efisien dan terstruktur.
+> 🌐 **SIBILING** adalah aplikasi web yang dirancang untuk mendigitalisasi dan mengelola alur layanan bimbingan konseling di **Universitas Bina Bangsa Getsempena (UBBG)**.  
+> Dibuat untuk mahasiswa, dosen konselor, dosen pembimbing, dan admin agar alur konseling jadi lebih **efisien, transparan, dan modern**.
+
+![Preview Animasi](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdjl3cTV2dGJ4c3pkczM0dHFna3RnZjM1Z3VvZmhhcHlvMnE4dWlqdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/uWlpPGquhGZNFzY90z/giphy.gif)
 
 ---
 
 ## 🚀 Tech Stack (Teknologi yang Digunakan)
-- **Backend Framework**: Laravel 11
-- **Frontend**: Blade Engine dengan Tailwind CSS & Alpine.js
-- **Database**: MySQL
-- **Lingkungan Development Lokal**: Laragon
-- **Code Editor**: Visual Studio Code
+![Laravel](https://img.shields.io/badge/Laravel-11-red?style=for-the-badge&logo=laravel)
+![Blade](https://img.shields.io/badge/Frontend-Blade%20%2B%20Tailwind%20%2B%20Alpine-blue?style=for-the-badge&logo=tailwindcss)
+![MySQL](https://img.shields.io/badge/Database-MySQL-orange?style=for-the-badge&logo=mysql)
+![Laragon](https://img.shields.io/badge/Local-Laragon-green?style=for-the-badge)
+![VSCode](https://img.shields.io/badge/Editor-VSCode-blue?style=for-the-badge&logo=visualstudiocode)
 
 ---
 
@@ -17,31 +20,27 @@ SIBILING adalah sebuah aplikasi web yang dirancang untuk mendigitalisasi dan men
 Sistem ini dirancang dengan 4 peran (aktor) utama, masing-masing dengan alur kerjanya sendiri.
 
 ### 1. Aktor Sistem
-- 🧑‍🎓 **Mahasiswa**: Pengguna utama yang membutuhkan layanan konseling.
-- 👩‍⚕️ **Dosen Konseling**: Konselor profesional yang bertugas memverifikasi, menjadwalkan, dan melaksanakan sesi konseling.
-- 👨‍🏫 **Dosen Pembimbing**: Dosen Pembimbing Akademik (PA) yang dapat memantau status konseling mahasiswa bimbingannya dan merekomendasikan mereka untuk konseling.
-- 🛠️ **Admin**: Super user yang mengelola data master, memantau seluruh aktivitas, dan memiliki hak akses penuh ke sistem.
+- 🧑‍🎓 **Mahasiswa** → Pengguna utama yang membutuhkan layanan konseling.
+- 👩‍⚕️ **Dosen Konseling** → Konselor profesional yang memverifikasi, menjadwalkan, dan melaksanakan sesi konseling.
+- 👨‍🏫 **Dosen Pembimbing** → Dosen PA yang dapat memantau status konseling mahasiswa bimbingannya dan merekomendasikan mereka.
+- 🛠️ **Admin** → Super user yang mengelola data master, memantau seluruh aktivitas, dan memiliki hak akses penuh.
 
 ### 2. Alur Pengajuan Konseling
 
-**Inisiasi:**
-- Jalur A (Inisiatif Mahasiswa): Mahasiswa login dan mengisi form pengajuan konseling. Sistem mencatat pengajuan dengan status *Menunggu Verifikasi*.
-- Jalur B (Rekomendasi Dosen PA): Dosen Pembimbing merekomendasikan salah satu mahasiswa bimbingannya. Mahasiswa akan mendapat notifikasi untuk melengkapi data sebelum proses dilanjutkan.
-
-**Verifikasi (oleh Dosen Konseling):**
-- Dosen Konseling menerima notifikasi pengajuan baru.
-- Jika data tidak lengkap → status diubah menjadi *Revisi Diperlukan* dan notifikasi dikirim ke mahasiswa.
-- Jika data lengkap → pengajuan diterima dan status diubah menjadi *Terverifikasi*.
-
-**Penjadwalan (oleh Dosen Konseling):**
-- Untuk pengajuan yang sudah terverifikasi, Dosen Konseling membuat jadwal (tanggal, waktu, tempat/online).
-- Status kasus diubah menjadi *Terjadwal*. Mahasiswa menerima notifikasi jadwal.
-
-**Pelaksanaan & Pelaporan:**
-- Sesi konseling berlangsung.
-- Setelah selesai, Dosen Konseling mengisi `hasil_konseling` (catatan & rekomendasi).
-- Jika butuh sesi lanjutan → kembali ke langkah Penjadwalan.
-- Jika tuntas → status kasus diubah menjadi *Selesai ✅*.
+```mermaid
+flowchart TD
+    A[🧑‍🎓 Mahasiswa Ajukan Konseling] -->|Jalur A| B[⏳ Menunggu Verifikasi]
+    C[👨‍🏫 Dosen PA Rekomendasi] -->|Jalur B| B
+    B --> D{👩‍⚕️ Verifikasi Data?}
+    D -->|Tidak Lengkap| E[🔁 Revisi Diperlukan]
+    D -->|Lengkap| F[✅ Terverifikasi]
+    F --> G[📅 Buat Jadwal Konseling]
+    G --> H[📌 Status Terjadwal + Notifikasi]
+    H --> I[💬 Sesi Konseling]
+    I --> J[📝 Isi Hasil Konseling]
+    J -->|Perlu Lanjutan| G
+    J -->|Tuntas| K[🏁 Selesai]
+```
 
 ---
 
@@ -59,34 +58,37 @@ php artisan migrate:fresh
 mysql -u root sibiling_bbg < database/sql/data_final.sql
 ```
 
+Tabel utama meliputi:  
+- `mahasiswa` 🧑‍🎓  
+- `dosen` 👨‍🏫  
+- `roles` 🛠️  
+- `konseling` 📑  
+- `jadwal_konseling` 📅  
+- `hasil_konseling` 📝  
+- `prodi` 🎓  
+
 ---
 
 ## 📑 Struktur Menu & Fitur (Rencana Final)
-Berikut adalah rencana menu yang akan tampil untuk setiap peran ketika aplikasi sudah jadi sepenuhnya.
 
-### 🛠️ Menu Admin
-- **Dashboard**: Tampilan statistik global (jumlah konseling, kasus aktif, dll).
-- **Manajemen Dosen**: Melihat daftar semua dosen, dengan tombol "Lihat Detail" untuk menampilkan semua 60+ kolom data dalam jendela modal. (✅ Sudah Dibuat)
-- **Manajemen Mahasiswa**: Melihat daftar semua mahasiswa, diurutkan per angkatan, dengan nama prodi yang sudah diterjemahkan dan tombol "Lihat Detail". (✅ Sudah Dibuat)
-- **Manajemen Konseling**: Melihat semua kasus konseling yang sedang berjalan, menugaskan Dosen Konselor, dll. (🚧 Fitur Selanjutnya)
-- **Manajemen Pengguna & Peran**: Mengelola akun login dan menetapkan peran.
-- **Laporan**: Mencetak laporan statistik konseling.
-
-### 👩‍⚕️ Menu Dosen Konseling
-- **Dashboard**: Menampilkan jadwal konseling hari ini dan pengajuan baru yang masuk.
-- **Daftar Pengajuan**: Memverifikasi, menerima, atau meminta revisi pengajuan dari mahasiswa.
-- **Jadwal Saya**: Mengatur jadwal sesi konseling.
-- **Kasus Aktif**: Melihat riwayat dan mengisi hasil untuk kasus yang sedang ditangani.
-
-### 👨‍🏫 Menu Dosen Pembimbing
-- **Dashboard**: Ringkasan aktivitas.
-- **Mahasiswa Bimbingan**: Melihat daftar mahasiswa bimbingannya dan status konseling mereka (tanpa bisa melihat detail masalah).
-- **Rekomendasikan Konseling**: Form untuk mendaftarkan mahasiswa bimbingannya.
-
-### 🧑‍🎓 Menu Mahasiswa
-- **Dashboard**: Tampilan utama.
-- **Ajukan Konseling**: Form pengajuan konseling.
-- **Riwayat Konseling Saya**: Melihat status dan riwayat semua pengajuan (pending, terjadwal, selesai), melihat jadwal, dan membaca hasil/rekomendasi dari konselor.
+| Role | Menu | Fitur |
+|------|------|-------|
+| 🛠️ **Admin** | Dashboard | Statistik global |
+| | Manajemen Dosen | Detail lengkap (60+ kolom) ✅ |
+| | Manajemen Mahasiswa | Per angkatan, detail prodi ✅ |
+| | Manajemen Konseling | Monitoring kasus 🚧 |
+| | Pengguna & Roles | Role-based access |
+| | Laporan | Cetak statistik |
+| 👩‍⚕️ **Dosen Konseling** | Dashboard | Jadwal + pengajuan baru |
+| | Daftar Pengajuan | Verifikasi / revisi |
+| | Jadwal Saya | Kelola jadwal |
+| | Kasus Aktif | Isi hasil konseling |
+| 👨‍🏫 **Dosen Pembimbing** | Dashboard | Ringkasan |
+| | Mahasiswa Bimbingan | Status konseling |
+| | Rekomendasikan Konseling | Form rekomendasi |
+| 🧑‍🎓 **Mahasiswa** | Dashboard | Status konseling |
+| | Ajukan Konseling | Form pengajuan |
+| | Riwayat Konseling | Status, jadwal, hasil |
 
 ---
 
