@@ -14,7 +14,17 @@ class Mahasiswa extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
-
-    // guarded = [] artinya semua kolom boleh diisi.
     protected $guarded = [];
+
+    /**
+     * Membuat relasi ke tabel Prodi.
+     * Satu Mahasiswa hanya punya satu Prodi.
+     */
+    public function prodi()
+    {
+        // 'Prodi::class' -> terhubung ke Model Prodi
+        // 'id_prodi' -> Foreign key di tabel mahasiswa
+        // 'id_prodi' -> Primary key di tabel prodi
+        return $this->belongsTo(Prodi::class, 'id_prodi', 'id_prodi');
+    }
 }
