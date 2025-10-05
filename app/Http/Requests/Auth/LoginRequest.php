@@ -26,10 +26,9 @@ class LoginRequest extends FormRequest
      */
     public function rules(): array
     {
-        // ==== PERUBAHAN DI SINI ====
-        // Kita ganti 'email' menjadi 'username'
         return [
-            'username' => ['required', 'string'],
+            // Kita ganti nama input dari 'username' menjadi 'login' agar lebih umum
+            'login' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -43,15 +42,27 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        // ==== PERUBAHAN DI SINI ====
-        // Kita ganti 'email' menjadi 'username'
-        if (! Auth::attempt($this->only('username', 'password'), $this->boolean('remember'))) {
+        // ==== LOGIKA PINTAR DIMULAI DI SINI ====
+
+        // Tentukan apakah input adalah email atau username
+        $login_type = filter_var($this->input('login'), FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        // Siapkan kredensial untuk login
+        $credentials = [
+            $login_type => $this->input('login'),
+            'password' => $this->input('password')
+        ];
+
+        // Coba lakukan login
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'username' => trans('auth.failed'),
+                'login' => trans('auth.failed'),
             ]);
         }
+        
+        // ==== LOGIKA PINTAR SELESAI ====
 
         RateLimiter::clear($this->throttleKey());
     }
@@ -72,7 +83,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'username' => trans('auth.throttle', [
+            'login' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -84,6 +95,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->input('username')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->input('login')).'|'.$this->ip());
     }
 }

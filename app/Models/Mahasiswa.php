@@ -17,6 +17,7 @@ class Mahasiswa extends Model
     protected $guarded = [];
 
     /**
+     * ==== TAMBAHKAN FUNGSI BARU DI BAWAH INI ====
      * Membuat relasi ke tabel Prodi.
      * Satu Mahasiswa hanya punya satu Prodi.
      */

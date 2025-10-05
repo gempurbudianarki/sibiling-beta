@@ -9,48 +9,27 @@ class Dosen extends Model
 {
     use HasFactory;
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
     protected $table = 'dosen';
-
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
     protected $primaryKey = 'email_dos';
-
-    /**
-     * Indicates if the model's ID is auto-incrementing.
-     *
-     * @var bool
-     */
     public $incrementing = false;
-
-    /**
-     * The data type of the auto-incrementing ID.
-     *
-     * @var string
-     */
     protected $keyType = 'string';
-
-    /**
-     * Indicates if the model should be timestamped.
-     *
-     * @var bool
-     */
     public $timestamps = false;
+    protected $guarded = [];
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'email', 'email_dos');
+    }
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
+     * Mendefinisikan relasi one-to-many ke tabel Mahasiswa.
+     * Satu Dosen bisa memiliki banyak Mahasiswa bimbingan.
      */
-    // guarded = [] artinya semua kolom boleh diisi.
-    // Ini cara cepat karena kolomnya sangat banyak.
-    protected $guarded = [];
+    public function mahasiswaBimbingan()
+    {
+        // ======================================================
+        // ==== PERBAIKANNYA ADA DI SINI ('id_pembimbing' -> 'id_dosen_wali') ====
+        // ======================================================
+        return $this->hasMany(Mahasiswa::class, 'id_dosen_wali', 'email_dos');
+    }
 }
-

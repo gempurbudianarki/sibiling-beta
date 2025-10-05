@@ -4,33 +4,63 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Dosen;
+use App\Models\Mahasiswa;
 use App\Models\Role;
-use Illuminate\Support\Facades\Hash; // Penting untuk enkripsi password
+use Illuminate\Support\Facades\Hash;
 
-class UserSeeder extends Seeder
+class UserSyncSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        // Baris ini bagus ditambahkan agar seeder bisa dijalankan berulang kali tanpa error
-        User::where('username', 'admin')->delete();
+        $this->command->info('Starting User & Role Synchronization...');
 
-        // 1. Buat user admin baru
-        $adminUser = User::create([
-            'name' => 'Admin SIBILING',
-            'username' => 'admin',
-            'email' => 'admin@sibiling.test', // <-- PERBAIKAN: Tambahkan email dummy
-            'password' => Hash::make('password'), // Ganti 'password' dengan password yang aman nanti
-        ]);
+        // Ambil role yang relevan
+        $dosenRole = Role::where('nama_role', 'dosen_pembimbing')->first();
+        $mahasiswaRole = Role::where('nama_role', 'mahasiswa')->first();
+        $defaultPassword = Hash::make('password123'); // Password default untuk semua user baru
 
-        // 2. Cari role 'admin' yang sudah ada di database
-        $adminRole = Role::where('name', 'admin')->first();
+        // 1. Sinkronisasi Dosen ke Tabel User
+        if ($dosenRole) {
+            $all_dosen = Dosen::all();
+            $dosenCount = 0;
+            foreach ($all_dosen as $dosen) {
+                // Lewati jika email dosen kosong, karena itu kunci utama kita
+                if (empty($dosen->email_dos)) {
+                    continue;
+                }
 
-        // 3. Hubungkan user admin dengan role 'admin'
-        if ($adminUser && $adminRole) {
-            $adminUser->roles()->attach($adminRole);
+                // Buat atau update user berdasarkan email
+                $user = User::updateOrCreate(
+                    ['email' => $dosen->email_dos], // Kunci pencarian: email
+                    [
+                        'name' => $dosen->nm_dos,
+                        // Buat username unik dari bagian depan email
+                        'username' => explode('@', $dosen->email_dos)[0] . ($dosen->nidn ?? ''),
+                        'password' => $defaultPassword,
+                    ]
+                );
+
+                // Kita tidak berikan role default di sini. Pemberian role dilakukan manual oleh admin.
+                // Jika kamu ingin semua dosen otomatis jadi dosen pembimbing, hapus komentar di baris bawah ini
+                // $user->roles()->syncWithoutDetaching([$dosenRole->id_role]);
+                $dosenCount++;
+            }
+            $this->command->info($dosenCount . ' Dosen synced to users table.');
+        } else {
+            $this->command->warn('Role "dosen_pembimbing" not found. Skipping Dosen sync.');
         }
+
+        // 2. Sinkronisasi Mahasiswa ke Tabel User (jika diperlukan di masa depan)
+        // Untuk saat ini kita fokus pada Dosen
+        if ($mahasiswaRole) {
+            // Logika untuk mahasiswa bisa ditambahkan di sini dengan cara yang sama
+             $this->command->info('Mahasiswa sync skipped for now.');
+        }
+
+        $this->command->info('User & Role Synchronization finished.');
     }
 }

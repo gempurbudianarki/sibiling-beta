@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -8,14 +9,17 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminUserSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        $adminRole = Role::firstOrCreate(['nama_role' => 'admin']);
-        Role::firstOrCreate(['nama_role' => 'dosen']);
-        Role::firstOrCreate(['nama_role' => 'mahasiswa']);
+        // 1. Cari Role 'admin' menggunakan kolom 'nama_role'
+        $adminRole = Role::where('nama_role', 'admin')->first();
 
+        // 2. Buat User Admin jika belum ada.
         $adminUser = User::firstOrCreate(
-            ['username' => 'admin'],
+            ['username' => 'admin'], // Cari berdasarkan username
             [
                 'name' => 'Admin SIBILING',
                 'email' => 'admin@sibiling.test',
@@ -23,6 +27,9 @@ class AdminUserSeeder extends Seeder
             ]
         );
 
-        $adminUser->roles()->syncWithoutDetaching([$adminRole->id_role]);
+        // 3. Hubungkan User dengan Role
+        if ($adminRole && $adminUser) {
+            $adminUser->roles()->syncWithoutDetaching([$adminRole->id_role]);
+        }
     }
 }

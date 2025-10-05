@@ -2,30 +2,52 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\Konseling;
-use Illuminate\Http\Request;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
     /**
-     * Menampilkan halaman dashboard admin.
+     * Menampilkan dashboard yang sesuai berdasarkan peran user.
      */
     public function index()
     {
-        // 1. Ambil data statistik dari database
-        $jumlahDosen = Dosen::count();
-        $jumlahMahasiswa = Mahasiswa::count();
-        $jumlahKonseling = Konseling::count();
-        $konselingBaru = Konseling::where('status', 'menunggu verifikasi')->count();
+        $user = Auth::user();
 
-        // 2. Kirim data tersebut ke view 'dashboard'
-        return view('dashboard', [
-            'jumlahDosen' => $jumlahDosen,
-            'jumlahMahasiswa' => $jumlahMahasiswa,
-            'jumlahKonseling' => $jumlahKonseling,
-            'konselingBaru' => $konselingBaru,
-        ]);
+        // Pastikan user valid sebelum melanjutkan
+        if (!$user || !($user instanceof User)) {
+            return redirect()->route('login');
+        }
+
+        // Cek jika user adalah DOSEN PEMBIMBING, langsung arahkan
+        if ($user->roles()->where('nama_role', 'dosen_pembimbing')->exists()) {
+            return redirect()->route('dosen-pembimbing.dashboard');
+        }
+        
+        // Siapkan data default untuk semua user
+        $viewData = [
+            'is_admin' => false,
+            'jumlahDosen' => 0,
+            'jumlahMahasiswa' => 0,
+            'jumlahKonseling' => 0,
+            'konselingBaru' => 0,
+        ];
+
+        // Jika user adalah ADMIN, isi dengan data asli
+        if ($user->roles()->where('nama_role', 'admin')->exists()) {
+            $viewData['is_admin'] = true;
+            $viewData['jumlahDosen'] = Dosen::count();
+            $viewData['jumlahMahasiswa'] = Mahasiswa::count();
+            $viewData['jumlahKonseling'] = Konseling::count();
+            $viewData['konselingBaru'] = Konseling::where('status', 'Diajukan')->count();
+        }
+        
+        // Untuk semua peran lain (Admin, Dosen Konseling, Mahasiswa, dll),
+        // tampilkan view 'dashboard' dengan data yang sudah disiapkan.
+        return view('dashboard', $viewData);
     }
 }

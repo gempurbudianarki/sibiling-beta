@@ -12,9 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('dosen', function (Blueprint $table) {
-            // PERUBAHAN UTAMA: Menjadikan email_dos sebagai Primary Key
             $table->string('email_dos')->primary();
-
             $table->string('pswd_dos');
             $table->string('gelar_dpn')->nullable();
             $table->string('nm_dos');
