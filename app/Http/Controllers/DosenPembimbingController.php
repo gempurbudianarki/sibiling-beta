@@ -2,68 +2,93 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Konseling;
+use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Dosen;
-use App\Models\Konseling;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class DosenPembimbingController extends Controller
 {
+    /**
+     * Menampilkan dashboard untuk dosen pembimbing.
+     */
     public function index()
     {
-        $user = Auth::user();
-        $dosen = Dosen::where('email_dos', $user->email)->firstOrFail();
-        $jumlahMahasiswa = $dosen->mahasiswaBimbingan()->count();
-        return view('dosen-pembimbing.dashboard', [
-            'jumlahMahasiswa' => $jumlahMahasiswa
-        ]);
+        $dosenEmail = Auth::user()->email;
+        $jumlahMahasiswa = Mahasiswa::where('id_dosen_wali', $dosenEmail)->count();
+
+        $konselingDiajukan = 0;
+        $konselingAktif = 0;
+        $konselingSelesai = 0;
+
+        return view('dosen-pembimbing.dashboard', compact(
+            'jumlahMahasiswa',
+            'konselingDiajukan',
+            'konselingAktif',
+            'konselingSelesai'
+        ));
     }
 
+    /**
+     * Menampilkan daftar mahasiswa yang menjadi bimbingan dosen PA.
+     */
     public function showMahasiswa()
     {
-        $user = Auth::user();
-        $dosen = Dosen::where('email_dos', $user->email)->firstOrFail();
-        $mahasiswaBimbingan = $dosen->mahasiswaBimbingan()->with('prodi')->paginate(15);
-        return view('dosen-pembimbing.mahasiswa', [
-            'mahasiswaBimbingan' => $mahasiswaBimbingan
-        ]);
+        $dosenEmail = Auth::user()->email;
+        $mahasiswaBimbingan = Mahasiswa::where('id_dosen_wali', $dosenEmail)
+                                        ->orderBy('angkatan', 'desc')
+                                        ->orderBy('nm_mhs', 'asc')
+                                        ->paginate(15);
+
+        return view('dosen-pembimbing.mahasiswa', compact('mahasiswaBimbingan'));
     }
 
+    /**
+     * Menampilkan form untuk merekomendasikan konseling.
+     */
     public function showRekomendasiForm()
     {
-        $user = Auth::user();
-        $dosen = Dosen::where('email_dos', $user->email)->firstOrFail();
-        $mahasiswaList = $dosen->mahasiswaBimbingan()->orderBy('nm_mhs', 'asc')->get();
-        return view('dosen-pembimbing.rekomendasi', [
-            'mahasiswaList' => $mahasiswaList
-        ]);
+        $dosenEmail = Auth::user()->email;
+        $mahasiswaBimbingan = Mahasiswa::where('id_dosen_wali', $dosenEmail)
+                                        ->with('prodi')
+                                        ->orderBy('nm_mhs', 'asc')
+                                        ->get();
+
+        return view('dosen-pembimbing.rekomendasi', compact('mahasiswaBimbingan'));
     }
 
+    /**
+     * Menyimpan data rekomendasi konseling dari Dosen PA.
+     */
     public function storeRekomendasi(Request $request)
     {
-        $request->validate([
-            'mahasiswa_nim' => 'required|exists:mahasiswa,nim',
-            'alasan' => 'required|string|min:10',
-            'surat_rekomendasi' => 'required|file|mimes:doc,docx|max:2048',
+        $validated = $request->validate([
+            'nim' => 'required|string|exists:mahasiswa,nim',
+            'permasalahan_segera' => 'required|string|min:20',
+            'harapan_konseling' => 'required|string|min:20',
         ]);
 
-        $file = $request->file('surat_rekomendasi');
-        $fileName = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-        $filePath = $file->storeAs('surat-rekomendasi', $fileName, 'public');
+        try {
+            Konseling::create([
+                'nim_mahasiswa' => $validated['nim'],
+                'id_dosen_wali' => Auth::user()->email,
+                'tgl_pengajuan' => now(),
+                'status_konseling' => 'Diajukan',
+                'sumber_pengajuan' => 'dosen_pa',
+                'permasalahan_segera' => $validated['permasalahan_segera'],
+                // INI ADALAH BARIS YANG SUDAH DIPERBAIKI TOTAL
+                'harapan_konseling' => $validated['harapan_konseling'],
+            ]);
 
-        // ==== PERBAIKAN LOGIKA PENYIMPANAN DI SINI ====
-        Konseling::create([
-            'id_mahasiswa' => $request->mahasiswa_nim, // Menggunakan 'id_mahasiswa'
-            'permasalahan' => $request->alasan,
-            'jenis_konseling' => 'Rekomendasi Dosen PA',
-            'status' => 'Diajukan',
-            'file_pendukung' => $filePath,
-            'tanggal_pengajuan' => now(),
-            // Tambahkan ID dosen yang merekomendasikan
-            'id_dosen_pembimbing_pengaju' => Auth::user()->id,
-        ]);
-        
-        return redirect()->route('dosen-pembimbing.dashboard')->with('success', 'Rekomendasi konseling berhasil dikirim.');
+            return redirect()->route('dosen-pembimbing.rekomendasi')
+                             ->with('status', 'rekomendasi-sent');
+
+        } catch (\Exception $e) {
+            Log::error('Gagal menyimpan rekomendasi konseling: ' . $e->getMessage());
+            return redirect()->back()
+                             ->withInput()
+                             ->withErrors(['database' => 'Terjadi kesalahan pada server. Gagal mengirim rekomendasi.']);
+        }
     }
 }

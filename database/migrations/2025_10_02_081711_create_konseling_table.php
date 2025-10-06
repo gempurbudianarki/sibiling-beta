@@ -12,18 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('konseling', function (Blueprint $table) {
-            $table->id('id_konseling');
-            $table->string('id_mahasiswa'); // Ini sudah benar
-            $table->integer('id_dosen_konseling')->nullable();
-            $table->integer('id_dosen_pembimbing_pengaju')->nullable();
-            $table->text('permasalahan');
-            $table->date('tanggal_pengajuan');
-            $table->string('status', 50)->default('menunggu verifikasi');
-            $table->text('revisi_catatan')->nullable();
-            
-            // ==== TAMBAHKAN DUA KOLOM BARU DI BAWAH INI ====
-            $table->string('jenis_konseling')->nullable(); // Untuk menyimpan tipe pengajuan (Rekomendasi Dosen PA, dll)
-            $table->string('file_pendukung')->nullable(); // Untuk menyimpan path file surat
+            // Skema final yang sudah benar dan lengkap
+            $table->increments('id_konseling');
+            $table->string('nim_mahasiswa', 15);
+            $table->string('id_dosen_wali', 50)->nullable();
+            $table->date('tgl_pengajuan');
+            $table->text('permasalahan')->nullable();
+            $table->string('status_konseling');
+            $table->string('rekomendation_dari')->nullable();
+            $table->json('aspek_permasalahan')->nullable();
+            $table->text('permasalahan_segera')->nullable();
+            $table->text('upaya_dilakukan')->nullable();
+            $table->text('harapan_pa')->nullable();
+            $table->string('sumber_pengajuan')->default('dosen_pa');
+            $table->text('harapan_konseling')->nullable();
         });
     }
 

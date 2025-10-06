@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,16 +16,12 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = Auth::user();
-
-        if (Auth::check() && $user instanceof User) {
-            // GANTI 'name' MENJADI 'nama_role' DI SINI
-            if ($user->roles()->where('nama_role', 'admin')->exists()) {
-                return $next($request);
-            }
+        // Pengecekan yang lebih ringkas dan aman
+        if (Auth::check() && $request->user()->roles()->where('nama_role', 'admin')->exists()) {
+            return $next($request);
         }
 
         // Jika tidak, tendang ke halaman dashboard biasa dengan pesan error
-        return redirect('/dashboard')->with('error', 'Anda tidak memiliki hak akses ke halaman ini.');
+        return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki hak akses Administrator.');
     }
 }

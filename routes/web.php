@@ -34,9 +34,12 @@ Route::middleware('auth')->group(function () {
     Route::middleware(IsDosenPembimbing::class)->prefix('dosen-pembimbing')->name('dosen-pembimbing.')->group(function () {
         Route::get('dashboard', [DosenPembimbingController::class, 'index'])->name('dashboard');
         Route::get('mahasiswa', [DosenPembimbingController::class, 'showMahasiswa'])->name('mahasiswa');
-        Route::get('rekomendasi', [DosenPembimbingController::class, 'showRekomendasiForm'])->name('rekomendasi.form');
         
-        // ==== TAMBAHKAN RUTE BARU UNTUK MENYIMPAN DATA DI SINI ====
+        // ==================================================================
+        // ==== PERBAIKANNYA ADA DI SINI ('rekomendasi.form' -> 'rekomendasi') ====
+        // ==================================================================
+        Route::get('rekomendasi', [DosenPembimbingController::class, 'showRekomendasiForm'])->name('rekomendasi');
+        
         Route::post('rekomendasi', [DosenPembimbingController::class, 'storeRekomendasi'])->name('rekomendasi.store');
     });
 

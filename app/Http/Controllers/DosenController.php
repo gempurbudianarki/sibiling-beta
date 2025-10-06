@@ -2,24 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Dosen; // <-- Jangan lupa mengimpor Model Dosen
+use App\Models\Dosen;
 use Illuminate\Http\Request;
 
 class DosenController extends Controller
 {
     /**
-     * Menampilkan daftar semua dosen.
+     * Display a listing of the resource.
      */
     public function index()
     {
-        // 1. Ambil data dari tabel 'dosen' menggunakan Model 'Dosen'.
-        // 2. Gunakan paginate(15) untuk memotong data menjadi beberapa halaman,
-        //    dengan 15 data per halaman.
-        $all_dosen = Dosen::paginate(15);
-
-        // 3. Kirim data yang sudah dipaginasi ke file view 'dosen.index'.
-        //    Data dikirim dalam variabel bernama 'all_dosen'.
-        return view('dosen.index', ['all_dosen' => $all_dosen]);
+        // ==================================================================
+        // ==== PERBAIKAN: Menyamakan nama variabel dengan yang ada di view ====
+        // ==================================================================
+        $all_dosen = Dosen::orderBy('nm_dos', 'asc')->paginate(15);
+        
+        return view('dosen.index', compact('all_dosen'));
     }
-}
 
+    // Metode lain bisa ditambahkan di sini jika diperlukan.
+}

@@ -13,6 +13,19 @@ class Konseling extends Model
     protected $primaryKey = 'id_konseling';
     public $timestamps = false;
 
-    // Izinkan semua kolom untuk diisi
-    protected $guarded = [];
+    /**
+     * ==================================================================
+     * ==== PERBAIKANNYA ADA DI SINI ====
+     * ==================================================================
+     * Mendefinisikan kolom yang boleh diisi melalui create() atau update().
+     */
+    protected $fillable = [
+        'nim_mahasiswa',
+        'id_dosen_wali',
+        'tgl_pengajuan',
+        'status_konseling',
+        'sumber_pengajuan',
+        'permasalahan_segera',
+        'harapan_konseling',
+    ];
 }
