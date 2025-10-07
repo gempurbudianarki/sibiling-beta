@@ -3,60 +3,70 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Dosen;
-use App\Models\Role;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Role;
+use Illuminate\Http\Request;
 
 class RoleAssignmentController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $dosens = Dosen::with('user.roles')
-            ->orderBy('nm_dos', 'asc') // Urutkan berdasarkan nama
-            ->paginate(15);
+        $users = User::whereHas('dosen')
+                     ->with('dosen', 'roles')
+                     ->latest()
+                     ->paginate(15);
 
-        return view('admin.roles.index', ['dosens' => $dosens]);
+        return view('admin.roles.index', compact('users'));
     }
 
-    // ==== METHOD BARU UNTUK MENANGANI LIVE SEARCH ====
+    public function edit(User $user)
+    {
+        $user->load('dosen'); 
+        $roles = Role::all();
+        
+        // --- INI PERBAIKANNYA ---
+        // Ambil ID dari semua peran yang dimiliki user ini dan ubah menjadi array
+        $userRoles = $user->roles->pluck('id_role')->toArray();
+
+        // Kirim ketiga variabel ini ke view
+        return view('admin.roles.edit', compact('user', 'roles', 'userRoles'));
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $request->validate([
+            'roles' => 'nullable|array',
+            'roles.*' => 'exists:roles,id_role', 
+        ]);
+
+        $roleIds = $request->input('roles', []);
+        
+        $adminRole = Role::where('nama_role', 'admin')->first();
+
+        if ($adminRole && $user->roles->pluck('id_role')->contains($adminRole->id_role)) {
+            if (!in_array($adminRole->id_role, $roleIds)) {
+                $roleIds[] = $adminRole->id_role; 
+            }
+        }
+        
+        $user->roles()->sync($roleIds);
+
+        return redirect()->route('admin.roles.index')
+                         ->with('status', 'Peran untuk ' . $user->name . ' berhasil diperbarui.');
+    }
+
     public function search(Request $request)
     {
-        $searchQuery = $request->query('search');
+        $query = $request->input('query');
 
-        $dosens = Dosen::with('user.roles')
-            ->where('nm_dos', 'like', '%' . $searchQuery . '%')
-            ->orderBy('nm_dos', 'asc')
-            ->get();
-
-        // Kembalikan hanya view parsial yang berisi baris-baris tabel
-        return view('admin.roles._dosen_table_rows', ['dosens' => $dosens]);
-    }
-
-    public function edit(Dosen $dosen)
-    {
-        $user = $dosen->user;
-        if (!$user) {
-            $user = User::create([
-                'name' => $dosen->nm_dos,
-                'email' => $dosen->email_dos,
-                'username' => explode('@', $dosen->email_dos)[0] . ($dosen->nidn ?? ''),
-                'password' => Hash::make('password123'),
-            ]);
-            $dosen->load('user');
-        }
-        $roles = Role::all();
-        return view('admin.roles.edit', [
-            'dosen' => $dosen,
-            'roles' => $roles
-        ]);
-    }
-
-    public function update(Request $request, Dosen $dosen)
-    {
-        $user = $dosen->user;
-        $user->roles()->sync($request->roles);
-        return redirect()->route('admin.roles.index')->with('success', 'Peran untuk ' . $dosen->nm_dos . ' berhasil diperbarui.');
+        $users = User::whereHas('dosen', function ($q) use ($query) {
+                        $q->where('nm_dos', 'like', "%{$query}%")
+                          ->orWhere('nidn', 'like', "%{$query}%");
+                     })
+                     ->with('dosen', 'roles')
+                     ->latest()
+                     ->paginate(15);
+        
+        return view('admin.roles.index', compact('users'));
     }
 }

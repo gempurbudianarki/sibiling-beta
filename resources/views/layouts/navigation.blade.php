@@ -13,16 +13,32 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    {{-- ====================================================== --}}
-                    {{-- ==== TAMBAHKAN MENU BARU ADMIN DI SINI ==== --}}
-                    {{-- ====================================================== --}}
-                    @if(Auth::check() && Auth::user()->roles()->where('nama_role', 'admin')->exists())
-                        <x-nav-link :href="route('admin.roles.index')" :active="request()->routeIs('admin.roles.*')">
-                            {{ __('Pengguna & Roles') }}
+                    @if(Auth::user()->roles->pluck('name')->contains('dosen_pembimbing'))
+                        <x-nav-link :href="route('dosen-pembimbing.mahasiswa')" :active="request()->routeIs('dosen-pembimbing.mahasiswa')">
+                            {{ __('Mhs Bimbingan') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('dosen-pembimbing.rekomendasi')" :active="request()->routeIs('dosen-pembimbing.rekomendasi')">
+                            {{ __('Rekomendasi') }}
                         </x-nav-link>
                     @endif
-                    {{-- ====================================================== --}}
 
+                    @if(Auth::user()->roles->pluck('name')->contains('dosen_konseling'))
+                        <x-nav-link :href="route('dosen-konseling.pengajuan.index')" :active="request()->routeIs('dosen-konseling.pengajuan.*')">
+                            {{ __('Pengajuan') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('dosen-konseling.jadwal.index')" :active="request()->routeIs('dosen-konseling.jadwal.*')">
+                            {{ __('Jadwal Saya') }}
+                        </x-nav-link>
+                         <x-nav-link :href="route('dosen-konseling.kasus.index')" :active="request()->routeIs('dosen-konseling.kasus.*')">
+                            {{ __('Riwayat Kasus') }}
+                        </x-nav-link>
+                    @endif
+                    
+                    @if(Auth::user()->roles->pluck('name')->contains('admin'))
+                        <x-nav-link :href="route('admin.roles.index')" :active="request()->routeIs('admin.roles.*')">
+                            {{ __('Manajemen Role') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -45,8 +61,7 @@
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                                    onclick="event.preventDefault(); this.closest('form').submit();">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
                         </form>
@@ -70,17 +85,6 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-
-             {{-- ====================================================== --}}
-             {{-- ==== TAMBAHKAN JUGA DI SINI UNTUK VERSI MOBILE ==== --}}
-             {{-- ====================================================== --}}
-             @if(Auth::check() && Auth::user()->roles()->where('nama_role', 'admin')->exists())
-                <x-responsive-nav-link :href="route('admin.roles.index')" :active="request()->routeIs('admin.roles.*')">
-                    {{ __('Pengguna & Roles') }}
-                </x-responsive-nav-link>
-            @endif
-             {{-- ====================================================== --}}
-
         </div>
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">
@@ -94,8 +98,7 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
+                            onclick="event.preventDefault(); this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>

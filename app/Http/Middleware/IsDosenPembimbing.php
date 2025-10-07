@@ -4,9 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class IsDosenPembimbing
 {
@@ -17,15 +16,11 @@ class IsDosenPembimbing
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = Auth::user();
-
-        // Cek apakah user sudah login dan punya peran 'dosen_pembimbing'
-        if ($user && $user instanceof User && $user->roles()->where('nama_role', 'dosen_pembimbing')->exists()) {
-            // Jika iya, izinkan masuk
+        // Menggunakan logika pengecekan peran yang sudah terbukti benar
+        if (Auth::check() && Auth::user()->roles()->where('nama_role', 'dosen_pembimbing')->exists()) {
             return $next($request);
         }
 
-        // Jika tidak, tendang ke dashboard biasa dengan pesan error
-        return redirect('/dashboard')->with('error', 'Anda tidak memiliki hak akses sebagai Dosen Pembimbing.');
+        return redirect('/dashboard')->with('error', 'Anda bukan Dosen Pembimbing.');
     }
 }

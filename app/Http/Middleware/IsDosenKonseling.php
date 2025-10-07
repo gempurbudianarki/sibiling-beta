@@ -6,9 +6,8 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User; // <-- Tambahkan import User
 
-class IsAdmin
+class IsDosenKonseling
 {
     /**
      * Handle an incoming request.
@@ -17,13 +16,11 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        /** @var User $user */ // <-- INI PERBAIKANNYA: Memberi petunjuk ke editor
-        $user = Auth::user();
-
-        if (Auth::check() && $user && $user->roles()->where('nama_role', 'admin')->exists()) {
+        // Menggunakan logika pengecekan peran yang sudah terbukti benar
+        if (Auth::check() && Auth::user()->roles()->where('nama_role', 'dosen_konseling')->exists()) {
             return $next($request);
         }
 
-        return redirect('/dashboard')->with('error', 'Anda tidak memiliki hak akses admin.');
+        return redirect('/dashboard')->with('error', 'Anda tidak memiliki hak akses Dosen Konseling.');
     }
 }

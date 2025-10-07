@@ -1,49 +1,56 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Atur Peran untuk Dosen') }}
+        <a href="{{ route('admin.roles.index') }}" class="text-blue-500 hover:underline">&larr; Kembali</a>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight mt-2">
+            Edit Peran untuk: {{ $user->name }}
         </h2>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    <div class="mb-4">
-                        {{-- Menggunakan 'nm_dos' sesuai struktur database asli --}}
-                        <h3 class="text-lg font-medium text-gray-900">Nama Dosen: {{ $dosen->nm_dos }}</h3>
-                        <p class="text-sm text-gray-500">Email: {{ $dosen->email_dos }}</p>
+                    <div class="mb-6 border-b pb-4">
+                        <p class="text-sm text-gray-500">NIDN: {{ $user->dosen->nidn ?? 'Tidak tersedia' }}</p>
+                        <p class="text-sm text-gray-500">Email: {{ $user->email }}</p>
                     </div>
 
-                    {{-- ====================================================== --}}
-                    {{-- ==== SOLUSI FINAL: BUAT URL ACTION SECARA MANUAL ==== --}}
-                    {{-- ====================================================== --}}
-                    <form method="POST" action="{{ url('admin/roles/' . $dosen->email_dos) }}">
+                    <form method="POST" action="{{ route('admin.roles.update', $user) }}">
                         @csrf
                         @method('PUT')
 
-                        <div class="mt-4">
-                            <label class="block font-medium text-sm text-gray-700">Pilih Peran:</label>
-
-                            <div class="mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <h3 class="font-medium text-gray-900">Tetapkan Peran</h3>
+                            <p class="text-sm text-gray-600 mt-1">Pilih satu atau lebih peran untuk pengguna ini.</p>
+                            
+                            <div class="mt-4 space-y-2">
                                 @foreach ($roles as $role)
-                                    <label class="inline-flex items-center">
-                                        <input type="checkbox" name="roles[]" value="{{ $role->id_role }}"
-                                            @if($dosen->user && $dosen->user->roles->contains($role->id_role)) checked @endif
-                                            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                                        <span class="ms-2 text-sm text-gray-600">{{ $role->nama_role }}</span>
+                                    @if($role->nama_role === 'admin' && !in_array($role->id_role, $userRoles))
+                                        @continue
+                                    @endif
+                                    
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="roles[]" value="{{ $role->id_role }}" 
+                                               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                               {{-- INI PERBAIKANNYA: Cek apakah ID role ada di dalam array $userRoles --}}
+                                               @if(in_array($role->id_role, $userRoles)) checked @endif
+                                               @if($role->nama_role === 'admin') disabled @endif>
+                                        
+                                        <span class="ms-2 text-sm text-gray-600">{{ str_replace('_', ' ', Str::title($role->nama_role)) }}</span>
+
+                                        @if($role->nama_role === 'admin')
+                                            <span class="ms-2 text-xs text-red-500">(Tidak dapat diubah)</span>
+                                        @endif
                                     </label>
                                 @endforeach
                             </div>
+                            <x-input-error :messages="$errors->get('roles')" class="mt-2" />
                         </div>
 
                         <div class="flex items-center justify-end mt-6">
-                            <a href="{{ route('admin.roles.index') }}" class="text-sm text-gray-600 hover:text-gray-900 underline">
-                                Batal
-                            </a>
-                            <x-primary-button class="ms-4">
-                                Simpan Perubahan
+                            <x-primary-button>
+                                {{ __('Simpan Perubahan') }}
                             </x-primary-button>
                         </div>
                     </form>

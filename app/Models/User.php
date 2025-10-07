@@ -2,19 +2,22 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Role; // <-- Pastikan ini ada
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany; // <-- Tambahkan ini
 
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection|Role[] $roles
+ * @property-read Dosen|null $dosen
+ */
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
-        'username',
         'email',
         'password',
     ];
@@ -33,17 +36,23 @@ class User extends Authenticatable
     }
 
     /**
-     * The roles that belong to the user.
+     * ==================================================================
+     * ==== INI ADALAH PERBAIKANNYA ====
+     * ==================================================================
+     * Relasi polymorphic many-to-many ke model Role.
+     * 'model' adalah nama dari relasi polymorphic di tabel pivot.
      */
-    // FUNGSI INI KITA PERBAIKI DENGAN PETA YANG JELAS
-    public function roles()
+    public function roles(): MorphToMany
     {
-        return $this->morphToMany(
-            Role::class,
-            'model',
-            'model_has_roles',
-            'model_id', // Foreign key di tabel model_has_roles untuk User
-            'id_role'     // Foreign key di tabel model_has_roles untuk Role
-        );
+        // Mengubah dari belongsToMany menjadi morphToMany
+        return $this->morphToMany(Role::class, 'model', 'model_has_roles', 'model_id', 'id_role');
+    }
+
+    /**
+     * Relasi one-to-one ke model Dosen.
+     */
+    public function dosen(): HasOne
+    {
+        return $this->hasOne(Dosen::class, 'email_dos', 'email');
     }
 }

@@ -14,9 +14,6 @@ class Konseling extends Model
     public $timestamps = false;
 
     /**
-     * ==================================================================
-     * ==== PERBAIKANNYA ADA DI SINI ====
-     * ==================================================================
      * Mendefinisikan kolom yang boleh diisi melalui create() atau update().
      */
     protected $fillable = [
@@ -28,4 +25,20 @@ class Konseling extends Model
         'permasalahan_segera',
         'harapan_konseling',
     ];
+
+    /**
+     * Relasi ke tabel Mahasiswa.
+     */
+    public function mahasiswa()
+    {
+        return $this->belongsTo(Mahasiswa::class, 'nim_mahasiswa', 'nim');
+    }
+
+    /**
+     * Relasi ke tabel JadwalKonseling (satu konseling bisa punya banyak jadwal/sesi).
+     */
+    public function jadwal()
+    {
+        return $this->hasMany(JadwalKonseling::class, 'id_konseling', 'id_konseling');
+    }
 }

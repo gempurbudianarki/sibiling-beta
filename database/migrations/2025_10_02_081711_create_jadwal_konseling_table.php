@@ -12,13 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('jadwal_konseling', function (Blueprint $table) {
-            $table->id('id_jadwal');
+            $table->increments('id_jadwal');
             $table->integer('id_konseling');
-            $table->date('tanggal_konseling');
-            $table->time('waktu_mulai');
-            $table->time('waktu_selesai')->nullable();
-            $table->string('jenis_konseling', 10)->default('offline');
-            $table->string('tempat_konseling')->nullable();
+            
+            // --- INI PERBAIKANNYA ---
+            $table->string('id_dosen_konseling', 50)->nullable(); // Menambahkan kolom untuk email dosen konselor
+            
+            $table->date('tgl_sesi');
+            $table->string('waktu_mulai', 5);
+            $table->string('waktu_selesai', 5)->nullable();
+            $table->string('lokasi');
+            $table->string('jenis_sesi');
+            $table->text('catatan')->nullable();
+            $table->string('status_sesi')->default('dijadwalkan');
         });
     }
 
