@@ -2,10 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Role;
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class AdminUserSeeder extends Seeder
 {
@@ -14,22 +15,31 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Cari Role 'admin' menggunakan kolom 'nama_role'
-        $adminRole = Role::where('nama_role', 'admin')->first();
+        $this->command->info('Creating or updating the default admin user...');
 
-        // 2. Buat User Admin jika belum ada.
-        $adminUser = User::firstOrCreate(
-            ['username' => 'admin'], // Cari berdasarkan username
+        // Cari role 'admin' menggunakan cara standar Spatie
+        $adminRole = Role::findByName('admin');
+
+        if (!$adminRole) {
+            $this->command->error("Role 'admin' not found. Please run RoleSeeder first.");
+            return;
+        }
+
+        // Buat atau update user admin
+        $adminUser = User::updateOrCreate(
+            ['email' => 'admin@sibiling.com'],
             [
-                'name' => 'Admin SIBILING',
-                'email' => 'admin@sibiling.test',
-                'password' => Hash::make('password'),
+                'name' => 'Administrator',
+                'password' => Hash::make('password'), // Ganti dengan password yang aman
             ]
         );
 
-        // 3. Hubungkan User dengan Role
-        if ($adminRole && $adminUser) {
-            $adminUser->roles()->syncWithoutDetaching([$adminRole->id_role]);
+        // Berikan role 'admin' ke user tersebut
+        if (!$adminUser->hasRole($adminRole)) {
+            $adminUser->assignRole($adminRole);
+            $this->command->info("Role 'admin' assigned to the admin user.");
         }
+
+        $this->command->info('Admin user seeded successfully.');
     }
 }

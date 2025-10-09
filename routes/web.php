@@ -1,70 +1,60 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DosenController;
 use App\Http\Controllers\MahasiswaController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Middleware\IsAdmin;
 use App\Http\Controllers\Admin\RoleAssignmentController;
-use App\Http\Controllers\DosenPembimbingController;
-use App\Http\Controllers\DosenKonselingController; // <-- Penambahan baru
-use App\Http\Middleware\IsDosenPembimbing;
-use App\Http\Middleware\IsDosenKonseling; // <-- Penambahan baru
-use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
+// Role-specific Dashboard Controllers
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\DosenKonseling\DashboardController as DosenKonselingDashboardController;
+use App\Http\Controllers\DosenPembimbing\DashboardController as DosenPembimbingDashboardController;
+use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
+
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Dashboard utama yang cerdas, ini kita pertahankan
+// The main dashboard route now acts as a dispatcher.
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])->name('dashboard');
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // Mengambil rute asli dari GitHub, sekarang dilindungi middleware admin
-    Route::get('/dosen', [DosenController::class, 'index'])->middleware(IsAdmin::class)->name('dosen.index');
-    Route::get('/mahasiswa', [MahasiswaController::class, 'index'])->middleware(IsAdmin::class)->name('mahasiswa.index');
-
-    // GRUP RUTE KHUSUS UNTUK DOSEN PEMBIMBING (Dari file asli Anda)
-    Route::middleware(IsDosenPembimbing::class)->prefix('dosen-pembimbing')->name('dosen-pembimbing.')->group(function () {
-        Route::get('mahasiswa', [DosenPembimbingController::class, 'showMahasiswa'])->name('mahasiswa');
-        Route::get('rekomendasi', [DosenPembimbingController::class, 'showRekomendasiForm'])->name('rekomendasi');
-        Route::post('rekomendasi', [DosenPembimbingController::class, 'storeRekomendasi'])->name('rekomendasi.store');
-    });
-
-    // GRUP RUTE KHUSUS UNTUK DOSEN KONSELING (Fitur baru yang kita tambahkan)
-    Route::middleware(IsDosenKonseling::class)->prefix('dosen-konseling')->name('dosen-konseling.')->group(function () {
-        Route::get('pengajuan', [DosenKonselingController::class, 'daftarPengajuan'])->name('pengajuan.index');
-        Route::get('pengajuan/{id_konseling}', [DosenKonselingController::class, 'showPengajuan'])->name('pengajuan.show');
-        Route::post('pengajuan/{id_konseling}/verifikasi', [DosenKonselingController::class, 'verifikasi'])->name('pengajuan.verifikasi');
-        Route::get('jadwal', [DosenKonselingController::class, 'daftarJadwal'])->name('jadwal.index');
-        Route::get('jadwal/{id_konseling}/create', [DosenKonselingController::class, 'createJadwal'])->name('jadwal.create');
-        Route::post('jadwal/{id_konseling}', [DosenKonselingController::class, 'storeJadwal'])->name('jadwal.store');
-        Route::get('kasus-aktif', [DosenKonselingController::class, 'daftarKasusAktif'])->name('kasus.index');
-        Route::get('kasus-aktif/{id_jadwal}/hasil/create', [DosenKonselingController::class, 'createHasil'])->name('kasus.hasil.create');
-        Route::post('kasus-aktif/{id_jadwal}/hasil', [DosenKonselingController::class, 'storeHasil'])->name('kasus.hasil.store');
-        Route::get('kasus-aktif/hasil/{id_hasil}', [DosenKonselingController::class, 'showHasil'])->name('kasus.hasil.show');
-    });
-
-    // GRUP RUTE KHUSUS UNTUK ADMIN (Pengelolaan Peran)
-    Route::middleware(IsAdmin::class)->prefix('admin')->name('admin.')->group(function () {
-        Route::get('roles', [RoleAssignmentController::class, 'index'])->name('roles.index');
-        Route::get('roles/{user}/edit', [RoleAssignmentController::class, 'edit'])->name('roles.edit');
-        Route::put('roles/{user}', [RoleAssignmentController::class, 'update'])->name('roles.update');
-        Route::get('roles/search', [RoleAssignmentController::class, 'search'])->name('roles.search');
-    });
 });
 
-Route::get('/api/mahasiswa/search', [MahasiswaController::class, 'searchApi']);
+// Admin Routes
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::resource('dosen', DosenController::class);
+    Route::resource('mahasiswa', MahasiswaController::class);
+    Route::get('assign-roles', [RoleAssignmentController::class, 'index'])->name('roles.index');
+    Route::post('assign-roles', [RoleAssignmentController::class, 'assign'])->name('roles.assign');
+});
 
-require __DIR__ . '/auth.php';
+// Dosen Konseling Routes
+Route::middleware(['auth', 'verified', 'role:dosen_konseling'])->prefix('dosen-konseling')->name('dosen-konseling.')->group(function () {
+    Route::get('/dashboard', [DosenKonselingDashboardController::class, 'index'])->name('dashboard');
+    // ... rute lain untuk dosen konseling bisa ditambahkan di sini
+});
+
+// Dosen Pembimbing Routes
+Route::middleware(['auth', 'verified', 'role:dosen_pembimbing'])->prefix('dosen-pembimbing')->name('dosen-pembimbing.')->group(function () {
+    Route::get('/dashboard', [DosenPembimbingDashboardController::class, 'index'])->name('dashboard');
+    // ... rute lain untuk dosen pembimbing bisa ditambahkan di sini
+});
+
+// Mahasiswa Routes
+Route::middleware(['auth', 'verified', 'role:mahasiswa'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+    Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
+    // ... rute lain untuk mahasiswa bisa ditambahkan di sini
+});
+
+
+require __DIR__.'/auth.php';

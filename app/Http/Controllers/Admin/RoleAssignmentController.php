@@ -2,19 +2,31 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
+use App\Http\Controllers\Controller;
 
 class RoleAssignmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::whereHas('dosen')
-                     ->with('dosen', 'roles')
-                     ->latest()
-                     ->paginate(15);
+        $query = $request->input('query');
+
+        // Query diubah untuk HANYA mengambil user yang punya profil dosen
+        $users = User::query()
+            ->whereHas('dosen') // HANYA USER DENGAN PROFIL DOSEN
+            ->when($query, function ($q, $search) {
+                return $q->where('email', 'like', "%{$search}%")
+                         ->orWhereHas('dosen', function ($q_dosen) use ($search) {
+                             $q_dosen->where('nm_dosen', 'like', "%{$search}%")
+                                     ->orWhere('nidn', 'like', "%{$search}%");
+                         });
+            })
+            ->with('roles', 'dosen') // Cukup eager load dosen dan roles
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
         return view('admin.roles.index', compact('users'));
     }
@@ -22,51 +34,28 @@ class RoleAssignmentController extends Controller
     public function edit(User $user)
     {
         $user->load('dosen'); 
-        $roles = Role::all();
+        $roles = Role::where('name', 'like', 'dosen_%')->get(); // Hanya ambil role untuk dosen
         
-        // --- INI PERBAIKANNYA ---
-        // Ambil ID dari semua peran yang dimiliki user ini dan ubah menjadi array
-        $userRoles = $user->roles->pluck('id_role')->toArray();
-
-        // Kirim ketiga variabel ini ke view
-        return view('admin.roles.edit', compact('user', 'roles', 'userRoles'));
+        return view('admin.roles.edit', compact('user', 'roles'));
     }
 
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,id_role', 
+            'roles' => 'sometimes|array' // 'sometimes' agar bisa mengosongkan role
         ]);
 
-        $roleIds = $request->input('roles', []);
+        // Ambil semua role yang ada, kecuali 'admin' dan 'mahasiswa'
+        $dosenRoles = Role::where('name', 'like', 'dosen_%')->pluck('name')->toArray();
         
-        $adminRole = Role::where('nama_role', 'admin')->first();
+        // Hapus dulu semua role dosen yang mungkin sudah ada
+        $user->removeRole(...$dosenRoles);
 
-        if ($adminRole && $user->roles->pluck('id_role')->contains($adminRole->id_role)) {
-            if (!in_array($adminRole->id_role, $roleIds)) {
-                $roleIds[] = $adminRole->id_role; 
-            }
+        // Berikan role baru dari request, jika ada
+        if ($request->has('roles')) {
+            $user->assignRole($request->roles);
         }
-        
-        $user->roles()->sync($roleIds);
 
-        return redirect()->route('admin.roles.index')
-                         ->with('status', 'Peran untuk ' . $user->name . ' berhasil diperbarui.');
-    }
-
-    public function search(Request $request)
-    {
-        $query = $request->input('query');
-
-        $users = User::whereHas('dosen', function ($q) use ($query) {
-                        $q->where('nm_dos', 'like', "%{$query}%")
-                          ->orWhere('nidn', 'like', "%{$query}%");
-                     })
-                     ->with('dosen', 'roles')
-                     ->latest()
-                     ->paginate(15);
-        
-        return view('admin.roles.index', compact('users'));
+        return redirect()->route('admin.roles.index')->with('success', 'Roles untuk ' . ($user->dosen->nm_dosen ?? $user->name) . ' berhasil diperbarui.');
     }
 }

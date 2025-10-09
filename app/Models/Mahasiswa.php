@@ -2,30 +2,35 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Mahasiswa extends Model
 {
     use HasFactory;
-
+    
     protected $table = 'mahasiswa';
     protected $primaryKey = 'nim';
     public $incrementing = false;
     protected $keyType = 'string';
-    public $timestamps = false;
+
     protected $guarded = [];
 
     /**
-     * ==== TAMBAHKAN FUNGSI BARU DI BAWAH INI ====
-     * Membuat relasi ke tabel Prodi.
-     * Satu Mahasiswa hanya punya satu Prodi.
+     * Get the prodi for the mahasiswa.
      */
-    public function prodi()
+    public function prodi(): BelongsTo
     {
-        // 'Prodi::class' -> terhubung ke Model Prodi
-        // 'id_prodi' -> Foreign key di tabel mahasiswa
-        // 'id_prodi' -> Primary key di tabel prodi
         return $this->belongsTo(Prodi::class, 'id_prodi', 'id_prodi');
+    }
+
+    /**
+     * Get the user that owns the mahasiswa profile.
+     */
+    public function user(): BelongsTo
+    {
+        // Menghubungkan kolom 'email' di tabel ini ke kolom 'email' di tabel 'users'
+        return $this->belongsTo(User::class, 'email', 'email');
     }
 }

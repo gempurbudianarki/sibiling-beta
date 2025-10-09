@@ -3,18 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphToMany; // <-- Tambahkan ini
+use Spatie\Permission\Traits\HasRoles;
 
-/**
- * @property-read \Illuminate\Database\Eloquent\Collection|Role[] $roles
- * @property-read Dosen|null $dosen
- */
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
         'name',
@@ -36,23 +32,20 @@ class User extends Authenticatable
     }
 
     /**
-     * ==================================================================
-     * ==== INI ADALAH PERBAIKANNYA ====
-     * ==================================================================
-     * Relasi polymorphic many-to-many ke model Role.
-     * 'model' adalah nama dari relasi polymorphic di tabel pivot.
-     */
-    public function roles(): MorphToMany
-    {
-        // Mengubah dari belongsToMany menjadi morphToMany
-        return $this->morphToMany(Role::class, 'model', 'model_has_roles', 'model_id', 'id_role');
-    }
-
-    /**
-     * Relasi one-to-one ke model Dosen.
+     * Get the dosen record associated with the user.
      */
     public function dosen(): HasOne
     {
-        return $this->hasOne(Dosen::class, 'email_dos', 'email');
+        // Foreign key di tabel 'dosen' adalah 'email_dosen'
+        // Local key (di tabel ini, 'users') adalah 'email'
+        return $this->hasOne(Dosen::class, 'email_dosen', 'email');
+    }
+
+    /**
+     * Get the mahasiswa record associated with the user.
+     */
+    public function mahasiswa(): HasOne
+    {
+        return $this->hasOne(Mahasiswa::class, 'email', 'email');
     }
 }

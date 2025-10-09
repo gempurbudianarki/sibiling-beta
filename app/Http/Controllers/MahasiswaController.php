@@ -4,48 +4,38 @@ namespace App\Http\Controllers;
 
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Illuminate\Http\JsonResponse;
 
 class MahasiswaController extends Controller
 {
     /**
-     * Menampilkan halaman utama Manajemen Mahasiswa.
+     * Display a listing of the resource.
      */
-    public function index()
+    public function index(): View
     {
-        // Logika awal untuk menampilkan halaman.
-        // Pencarian selanjutnya akan ditangani oleh API.
-        $all_mahasiswa = Mahasiswa::with('prodi')
-                           ->orderBy('angkatan', 'desc')
-                           ->orderBy('nm_mhs', 'asc')
-                           ->paginate(15);
+        // Ambil data mahasiswa dengan pagination, urutkan berdasarkan angkatan terbaru, lalu nama.
+        // Eager load relasi 'prodi' untuk menghindari N+1 query problem.
+        $mahasiswa = Mahasiswa::with('prodi')
+            ->orderBy('angkatan', 'desc')
+            ->orderBy('nm_mhs', 'asc')
+            ->paginate(15); // Ambil 15 data per halaman
 
-        return view('mahasiswa.index', [
-            'all_mahasiswa' => $all_mahasiswa,
-        ]);
+        // Kirim data ke view
+        return view('mahasiswa.index', compact('mahasiswa'));
     }
 
     /**
-     * API endpoint untuk live search.
-     * Fungsi ini akan mengembalikan data dalam format JSON.
+     * Display the specified resource for API requests.
+     * Ini akan digunakan oleh modal detail.
      */
-    public function searchApi(Request $request)
+    public function show(Mahasiswa $mahasiswa): JsonResponse
     {
-        $search = $request->input('q');
-
-        $query = Mahasiswa::with('prodi');
-
-        // Jika ada input pencarian, filter berdasarkan nama ATAU nim
-        $query->when($search, function ($q, $search) {
-            return $q->where('nm_mhs', 'like', $search . '%')
-                     ->orWhere('nim', 'like', $search . '%');
-        });
-
-        // Ambil 10 hasil teratas yang cocok
-        $results = $query->orderBy('nm_mhs', 'asc')
-                         ->take(15) 
-                         ->get();
-
-        return response()->json($results);
+        // Load relasi prodi untuk memastikan datanya ada
+        $mahasiswa->load('prodi');
+        return response()->json($mahasiswa);
     }
-}
 
+    // Method create, store, edit, update, destroy bisa dibiarkan kosong untuk saat ini
+    // karena kita tidak menggunakannya.
+}
