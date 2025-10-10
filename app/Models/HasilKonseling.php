@@ -11,22 +11,22 @@ class HasilKonseling extends Model
 
     protected $table = 'hasil_konseling';
     protected $primaryKey = 'id_hasil';
-    public $timestamps = false; // Sesuai migrasi Anda
 
+    // public $timestamps = false; // Baris ini kita hapus agar cocok dengan migrasi
+    
     /**
      * Kolom yang dapat diisi secara massal.
+     * Namanya disamakan dengan yang ada di Controller dan View.
      */
     protected $fillable = [
         'id_jadwal',
-        'ringkasan_sesi',
-        'observasi_konselor',
-        'tindak_lanjut',
-        'status_akhir_sesi', // 'lanjut' atau 'selesai'
-        'tgl_pencatatan',
+        'catatan_sesi', // Menggunakan 'catatan_sesi' agar konsisten
+        'rekomendasi',  // Menggunakan 'rekomendasi' agar konsisten
+        'status_akhir', // Menggunakan 'status_akhir' agar konsisten
     ];
 
     /**
-     * Relasi ke model JadwalKonseling (satu hasil milik satu jadwal).
+     * Relasi ke model JadwalKonseling.
      */
     public function jadwal()
     {

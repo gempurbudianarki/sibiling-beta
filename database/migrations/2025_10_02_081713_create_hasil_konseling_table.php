@@ -7,20 +7,27 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Jalankan migrasi.
      */
     public function up(): void
     {
         Schema::create('hasil_konseling', function (Blueprint $table) {
+            // Primary key
             $table->id('id_hasil');
-            $table->integer('id_jadwal');
-            $table->text('catatan_konselor');
+
+            // Foreign key ke jadwal_konseling (tipe harus sama = unsignedBigInteger)
+            $table->unsignedBigInteger('id_jadwal');
+
+            // Kolom isi hasil konseling
+            $table->text('catatan_sesi');
             $table->text('rekomendasi')->nullable();
+            $table->enum('status_akhir', ['tuntas', 'lanjutan']);
+            $table->timestamps();
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Reverse migrasi.
      */
     public function down(): void
     {

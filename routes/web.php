@@ -62,6 +62,10 @@ Route::middleware(['auth', 'verified', 'role:dosen_konseling'])->prefix('dosen-k
     Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
     Route::get('/jadwal/create/{pengajuan}', [JadwalController::class, 'create'])->name('jadwal.create');
     Route::post('/jadwal', [JadwalController::class, 'store'])->name('jadwal.store');
+    Route::get('/jadwal/{jadwal}/mulai-sesi', [JadwalController::class, 'mulaiSesi'])->name('jadwal.mulaiSesi');
+
+    // == INI RUTE PENTING YANG SUDAH ADA DI KODEMU ==
+    Route::post('/jadwal/{jadwal}/simpan-sesi', [JadwalController::class, 'simpanSesi'])->name('jadwal.simpanSesi');
     
     // Rute Kasus
     Route::get('/kasus', [KasusController::class, 'index'])->name('kasus.index');
@@ -87,3 +91,4 @@ Route::middleware(['auth', 'verified', 'role:mahasiswa'])->prefix('mahasiswa')->
 
 
 require __DIR__.'/auth.php';
+

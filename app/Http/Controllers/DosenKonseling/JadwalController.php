@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\DosenKonseling;
 
+use App\Models\HasilKonseling;
 use App\Models\Konseling;
 use App\Models\JadwalKonseling;
 use Illuminate\Http\Request;
@@ -10,51 +11,35 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class JadwalController extends Controller
 {
-    /**
-     * Menampilkan daftar jadwal konseling milik dosen yang login.
-     */
     public function index(): View
     {
         $user = Auth::user();
         $jadwal = new LengthAwarePaginator([], 0, 15);
-
         if ($user->dosen) {
             $dosenId = $user->dosen->email_dos;
-
             $jadwal = JadwalKonseling::where('id_dosen_konseling', $dosenId)
                 ->with('konseling.mahasiswa')
                 ->orderBy('tgl_sesi', 'desc')
                 ->orderBy('waktu_mulai', 'desc')
                 ->paginate(10);
         }
-
         return view('dosen-konseling.jadwal.index', compact('jadwal'));
     }
 
-    /**
-     * FORM untuk membuat jadwal baru dari pengajuan tertentu.
-     */
-    public function create(Konseling $pengajuan): View
+    public function create(Konseling $pengajuan): View|RedirectResponse
     {
-        // Cek kalau pengajuan belum disetujui, kembalikan error
         if ($pengajuan->status_konseling !== 'disetujui') {
             return redirect()->route('dosen-konseling.dashboard')
                 ->with('error', 'Pengajuan ini belum disetujui.');
         }
-
-        // Pastikan relasi mahasiswa dimuat biar gak null di view
         $pengajuan->load('mahasiswa');
-
-        // Kirim ke view jadwal.create
         return view('dosen-konseling.jadwal.create', compact('pengajuan'));
     }
 
-    /**
-     * Menyimpan jadwal baru ke database.
-     */
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
@@ -65,13 +50,10 @@ class JadwalController extends Controller
             'lokasi' => 'required|string|max:255',
             'jenis_sesi' => 'required|in:online,offline',
         ]);
-
         $user = Auth::user();
-
         if (!$user->dosen) {
             return back()->with('error', 'Profil dosen Anda tidak ditemukan.');
         }
-
         JadwalKonseling::create([
             'id_konseling' => $request->id_konseling,
             'id_dosen_konseling' => $user->dosen->email_dos,
@@ -82,13 +64,54 @@ class JadwalController extends Controller
             'jenis_sesi' => $request->jenis_sesi,
             'status_sesi' => 'dijadwalkan',
         ]);
-
-        // Update status konseling
         $konseling = Konseling::find($request->id_konseling);
         $konseling->status_konseling = 'terjadwal';
         $konseling->save();
-
         return redirect()->route('dosen-konseling.jadwal.index')
             ->with('success', 'Jadwal konseling berhasil dibuat.');
+    }
+
+    public function mulaiSesi(JadwalKonseling $jadwal): View
+    {
+        $jadwal->load('konseling.mahasiswa');
+        return view('dosen-konseling.jadwal.mulai-sesi', compact('jadwal'));
+    }
+
+    /**
+     * INI FUNGSI YANG SEBELUMNYA HILANG
+     * Menerima data dari form, memvalidasi, menyimpan, dan redirect.
+     */
+    public function simpanSesi(Request $request, JadwalKonseling $jadwal): RedirectResponse
+    {
+        $request->validate([
+            'catatan_sesi' => 'required|string',
+            'rekomendasi' => 'nullable|string',
+            'status_akhir' => 'required|in:tuntas,lanjutan',
+        ]);
+
+        DB::transaction(function () use ($request, $jadwal) {
+            // Simpan ke tabel hasil_konseling
+            HasilKonseling::create([
+                'id_jadwal' => $jadwal->id_jadwal,
+                'catatan_sesi' => $request->catatan_sesi,
+                'rekomendasi' => $request->rekomendasi,
+                'status_akhir' => $request->status_akhir,
+            ]);
+
+            // Update status sesi di tabel jadwal_konseling
+            $jadwal->status_sesi = 'selesai';
+            $jadwal->save();
+
+            // Jika 'tuntas', selesaikan juga kasus utamanya
+            if ($request->status_akhir === 'tuntas') {
+                $konseling = $jadwal->konseling;
+                $konseling->status_konseling = 'selesai';
+                $konseling->save();
+            }
+        });
+        
+        // Arahkan ke halaman Riwayat Kasus
+        return redirect()->route('dosen-konseling.kasus.index')
+            ->with('success', 'Hasil sesi konseling berhasil disimpan.');
     }
 }

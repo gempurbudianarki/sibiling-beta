@@ -49,13 +49,15 @@
                     </div>
 
                     <div class="mt-4">
+                        {{-- Laravel Pagination Links --}}
                         {!! $mahasiswa->links() !!}
                     </div>
                 </div>
             </div>
         </div>
 
-        <div x-show="isModalOpen" @click.away="isModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        {{-- Modal Detail Mahasiswa --}}
+        <div x-show="isModalOpen" @click.away="isModalOpen = false" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" style="display: none;">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col" @click.stop>
                 <div class="flex justify-between items-center p-4 border-b">
                     <h3 class="text-xl font-semibold" x-text="`Detail Mahasiswa: ${selectedMhs.nm_mhs || ''}`"></h3>
@@ -95,7 +97,7 @@
                                 <div class="border-b pb-2"><dt class="font-bold text-gray-600">No. KTP</dt><dd x-text="selectedMhs.no_ktp"></dd></div>
                                 <div class="border-b pb-2"><dt class="font-bold text-gray-600">Email</dt><dd x-text="selectedMhs.email"></dd></div>
                                 <div class="border-b pb-2"><dt class="font-bold text-gray-600">No. HP</dt><dd x-text="selectedMhs.no_hp"></dd></div>
-                                <div class="border-b pb-2 col-span-full"><dt class="font-bold text-gray-600">Alamat</dt><dd x-text="`${selectedMhs.jln}, ${selectedMhs.nama_desa}`"></dd></div>
+                                <div class="border-b pb-2 col-span-full"><dt class="font-bold text-gray-600">Alamat</dt><dd x-text="`${selectedMhs.jln}, ${selectedMhs.nm_desa}`"></dd></div>
                            </dl>
                         </div>
                         <div x-show="activeTab === 'ortu'">
@@ -103,7 +105,7 @@
                                 <div>
                                     <h4 class="font-semibold mb-2">Data Ayah</h4>
                                     <dl class="text-sm space-y-2">
-                                        <div><dt class="font-bold text-gray-600">Nama Ayah</dt><dd x-text="selectedMhs.nama_ayah"></dd></div>
+                                        <div><dt class="font-bold text-gray-600">Nama Ayah</dt><dd x-text="selectedMhs.nm_ayah"></dd></div>
                                         <div><dt class="font-bold text-gray-600">No. KTP Ayah</dt><dd x-text="selectedMhs.no_ktp_ayah"></dd></div>
                                         <div><dt class="font-bold text-gray-600">Pendidikan Ayah</dt><dd x-text="selectedMhs.id_jenjang_pendidikan_ayah"></dd></div>
                                         <div><dt class="font-bold text-gray-600">Pekerjaan Ayah</dt><dd x-text="selectedMhs.id_pekerjaan_ayah"></dd></div>
@@ -112,7 +114,7 @@
                                 <div>
                                     <h4 class="font-semibold mb-2">Data Ibu</h4>
                                     <dl class="text-sm space-y-2">
-                                        <div><dt class="font-bold text-gray-600">Nama Ibu</dt><dd x-text="selectedMhs.nama_ibu_kandung"></dd></div>
+                                        <div><dt class="font-bold text-gray-600">Nama Ibu</dt><dd x-text="selectedMhs.nm_ibu_kandung"></dd></div>
                                         <div><dt class="font-bold text-gray-600">No. KTP Ibu</dt><dd x-text="selectedMhs.no_ktp_ibu"></dd></div>
                                         <div><dt class="font-bold text-gray-600">Pendidikan Ibu</dt><dd x-text="selectedMhs.id_jenjang_pendidikan_ibu"></dd></div>
                                         <div><dt class="font-bold text-gray-600">Pekerjaan Ibu</dt><dd x-text="selectedMhs.id_pekerjaan_ibu"></dd></div>
@@ -133,7 +135,8 @@
     <script>
         function mahasiswaPage() {
             return {
-                mahasiswaList: @json($mahasiswa->items()),
+                // PENJELASAN PERUBAHAN ADA DI SINI
+                mahasiswaList: JSON.parse('{!! addslashes(json_encode($mahasiswa->items())) !!}'),
                 isLoading: false,
                 isDetailLoading: false,
                 search: '',
@@ -152,6 +155,7 @@
                 },
                 searchMahasiswa() {
                     // Fitur search bisa kita kembangkan lebih lanjut jika diperlukan
+                    console.log('Mencari:', this.search);
                 }
             }
         }
