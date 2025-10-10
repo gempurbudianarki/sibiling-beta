@@ -7,51 +7,102 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+            {{-- ✅ Alert Notifikasi --}}
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline">{{ session('success') }}</span>
+                </div>
+            @endif
+
+            {{-- ✅ Card Utama --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    @if (session('status') === 'jadwal-created')
-                        <div class="mb-4 p-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-                            Jadwal konseling berhasil dibuat.
-                        </div>
-                    @endif
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mahasiswa</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jadwal Sesi</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi/Metode</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Mahasiswa</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Jadwal</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Lokasi / Tipe</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
+
                             <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse ($jadwals as $jadwal)
-                                    <tr>
+                                @forelse ($jadwal as $item)
+                                    <tr class="hover:bg-gray-50 transition duration-150 ease-in-out">
+                                        {{-- Mahasiswa --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-gray-900">{{ $jadwal->konseling->mahasiswa->nm_mhs ?? 'N/A' }}</div>
-                                            <div class="text-sm text-gray-500">{{ $jadwal->konseling->nim_mahasiswa }}</div>
+                                            <div class="text-sm font-medium text-gray-900">
+                                                {{ $item->konseling->mahasiswa->nm_mhs ?? 'N/A' }}
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                {{ $item->konseling->mahasiswa->nim ?? 'N/A' }}
+                                            </div>
                                         </td>
+
+                                        {{-- Jadwal --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($jadwal->tgl_sesi)->isoFormat('dddd, D MMMM YYYY') }}</div>
-                                            <div class="text-sm text-gray-500">{{ $jadwal->waktu_mulai }} - {{ $jadwal->waktu_selesai }}</div>
+                                            <div class="text-sm text-gray-900">
+                                                {{ \Carbon\Carbon::parse($item->tgl_sesi)->translatedFormat('l, d M Y') }}
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                {{ $item->waktu_mulai }} - {{ $item->waktu_selesai }} WIB
+                                            </div>
                                         </td>
+
+                                        {{-- Lokasi & Jenis --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900">{{ $jadwal->lokasi }}</div>
-                                            <div class="text-sm text-gray-500">{{ Str::title($jadwal->jenis_sesi) }}</div>
+                                            <div class="text-sm text-gray-900">{{ $item->lokasi }}</div>
+                                            <div class="text-sm text-gray-500 capitalize">{{ $item->jenis_sesi }}</div>
                                         </td>
+
+                                        {{-- Status --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                {{ $jadwal->status_sesi }}
+                                            @php
+                                                $statusColor = match($item->status_sesi) {
+                                                    'dijadwalkan' => 'bg-blue-100 text-blue-800',
+                                                    'selesai' => 'bg-green-100 text-green-800',
+                                                    'dibatalkan' => 'bg-red-100 text-red-800',
+                                                    default => 'bg-gray-100 text-gray-700',
+                                                };
+                                            @endphp
+
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusColor }}">
+                                                {{ ucfirst($item->status_sesi) }}
                                             </span>
+                                        </td>
+
+                                        {{-- Aksi --}}
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            @if ($item->status_sesi === 'dijadwalkan')
+                                                <a href="#" class="text-indigo-600 hover:text-indigo-900 font-semibold transition">
+                                                    Mulai Sesi
+                                                </a>
+                                            @elseif ($item->status_sesi === 'selesai')
+                                                <span class="text-gray-500 italic">Selesai</span>
+                                            @elseif ($item->status_sesi === 'dibatalkan')
+                                                <span class="text-red-500 italic">Dibatalkan</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Belum ada jadwal yang dibuat.</td></tr>
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-8 whitespace-nowrap text-center text-sm text-gray-500">
+                                            Anda belum memiliki jadwal konseling.
+                                        </td>
+                                    </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
-                     <div class="mt-6">{{ $jadwals->links() }}</div>
+
+                    {{-- ✅ Pagination --}}
+                    <div class="mt-4">
+                        {{ $jadwal->links() }}
+                    </div>
                 </div>
             </div>
         </div>

@@ -13,17 +13,17 @@ class RoleAssignmentController extends Controller
     {
         $query = $request->input('query');
 
-        // Query diubah untuk HANYA mengambil user yang punya profil dosen
         $users = User::query()
-            ->whereHas('dosen') // HANYA USER DENGAN PROFIL DOSEN
+            ->whereHas('dosen') 
             ->when($query, function ($q, $search) {
                 return $q->where('email', 'like', "%{$search}%")
                          ->orWhereHas('dosen', function ($q_dosen) use ($search) {
-                             $q_dosen->where('nm_dosen', 'like', "%{$search}%")
+                             // ================== PERBAIKAN DI SINI ==================
+                             $q_dosen->where('nm_dos', 'like', "%{$search}%")
                                      ->orWhere('nidn', 'like', "%{$search}%");
                          });
             })
-            ->with('roles', 'dosen') // Cukup eager load dosen dan roles
+            ->with('roles', 'dosen')
             ->latest()
             ->paginate(15)
             ->withQueryString();
@@ -34,7 +34,7 @@ class RoleAssignmentController extends Controller
     public function edit(User $user)
     {
         $user->load('dosen'); 
-        $roles = Role::where('name', 'like', 'dosen_%')->get(); // Hanya ambil role untuk dosen
+        $roles = Role::where('name', 'like', 'dosen_%')->get();
         
         return view('admin.roles.edit', compact('user', 'roles'));
     }
@@ -42,20 +42,17 @@ class RoleAssignmentController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'roles' => 'sometimes|array' // 'sometimes' agar bisa mengosongkan role
+            'roles' => 'sometimes|array'
         ]);
 
-        // Ambil semua role yang ada, kecuali 'admin' dan 'mahasiswa'
         $dosenRoles = Role::where('name', 'like', 'dosen_%')->pluck('name')->toArray();
         
-        // Hapus dulu semua role dosen yang mungkin sudah ada
         $user->removeRole(...$dosenRoles);
 
-        // Berikan role baru dari request, jika ada
         if ($request->has('roles')) {
             $user->assignRole($request->roles);
         }
 
-        return redirect()->route('admin.roles.index')->with('success', 'Roles untuk ' . ($user->dosen->nm_dosen ?? $user->name) . ' berhasil diperbarui.');
+        return redirect()->route('admin.roles.index')->with('success', 'Roles untuk ' . ($user->dosen->nm_dos ?? $user->name) . ' berhasil diperbarui.');
     }
 }

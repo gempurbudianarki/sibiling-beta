@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\DosenKonseling;
 
-use App\Http\Controllers\Controller;
+use App\Models\Konseling;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -15,8 +17,13 @@ class DashboardController extends Controller
      */
     public function index(): View
     {
-        // Logic untuk data dashboard dosen konseling
-        // Contoh: daftar pengajuan konseling baru, jadwal hari ini, dll.
-        return view('dosen-konseling.dashboard');
+        // ================== PERBAIKAN FINAL DENGAN NAMA KOLOM DARI MIGRasi TERBARU ==================
+        $pengajuanBaru = Konseling::where('status_konseling', 'menunggu_verifikasi')
+                                    ->with('mahasiswa.prodi')
+                                    ->latest('tgl_pengajuan') 
+                                    ->paginate(10); 
+
+        // Kirim data ke view
+        return view('dosen-konseling.dashboard', compact('pengajuanBaru'));
     }
 }

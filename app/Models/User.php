@@ -36,9 +36,9 @@ class User extends Authenticatable
      */
     public function dosen(): HasOne
     {
-        // Foreign key di tabel 'dosen' adalah 'email_dosen'
-        // Local key (di tabel ini, 'users') adalah 'email'
-        return $this->hasOne(Dosen::class, 'email_dosen', 'email');
+        // ================== PERBAIKAN DI SINI ==================
+        // Menghubungkan 'email' dari tabel users ke 'email_dos' di tabel dosen
+        return $this->hasOne(Dosen::class, 'email_dos', 'email');
     }
 
     /**
@@ -46,6 +46,7 @@ class User extends Authenticatable
      */
     public function mahasiswa(): HasOne
     {
+        // Menghubungkan 'email' dari tabel users ke 'email' di tabel mahasiswa
         return $this->hasOne(Mahasiswa::class, 'email', 'email');
     }
 }

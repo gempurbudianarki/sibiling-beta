@@ -2,43 +2,42 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Konseling extends Model
 {
     use HasFactory;
 
     protected $table = 'konseling';
-    protected $primaryKey = 'id_konseling';
+    protected $guarded = [];
     public $timestamps = false;
 
+    // ================== TAMBAHKAN DUA PROPERTI INI ==================
     /**
-     * Mendefinisikan kolom yang boleh diisi melalui create() atau update().
+     * The primary key associated with the table.
+     *
+     * @var string
      */
-    protected $fillable = [
-        'nim_mahasiswa',
-        'id_dosen_wali',
-        'tgl_pengajuan',
-        'status_konseling',
-        'sumber_pengajuan',
-        'permasalahan_segera',
-        'harapan_konseling',
-    ];
+    protected $primaryKey = 'id_konseling';
 
     /**
-     * Relasi ke tabel Mahasiswa.
+     * Get the route key for the model.
+     *
+     * @return string
      */
-    public function mahasiswa()
+    public function getRouteKeyName()
+    {
+        return 'id_konseling';
+    }
+    // ==============================================================
+
+    /**
+     * Get the mahasiswa that owns the konseling record.
+     */
+    public function mahasiswa(): BelongsTo
     {
         return $this->belongsTo(Mahasiswa::class, 'nim_mahasiswa', 'nim');
-    }
-
-    /**
-     * Relasi ke tabel JadwalKonseling (satu konseling bisa punya banyak jadwal/sesi).
-     */
-    public function jadwal()
-    {
-        return $this->hasMany(JadwalKonseling::class, 'id_konseling', 'id_konseling');
     }
 }
