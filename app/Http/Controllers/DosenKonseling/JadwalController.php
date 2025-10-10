@@ -18,7 +18,7 @@ class JadwalController extends Controller
     public function index(): View
     {
         $user = Auth::user();
-        $jadwal = new LengthAwarePaginator([], 0, 15);
+        $jadwal = new LengthAwarePaginator([], 0, 15); // Default Paginator kosong
         if ($user->dosen) {
             $dosenId = $user->dosen->email_dos;
             $jadwal = JadwalKonseling::where('id_dosen_konseling', $dosenId)
@@ -34,7 +34,7 @@ class JadwalController extends Controller
     {
         if ($pengajuan->status_konseling !== 'disetujui') {
             return redirect()->route('dosen-konseling.dashboard')
-                ->with('error', 'Pengajuan ini belum disetujui.');
+                ->with('error', 'Pengajuan ini belum disetujui atau sudah dijadwalkan.');
         }
         $pengajuan->load('mahasiswa');
         return view('dosen-konseling.jadwal.create', compact('pengajuan'));
@@ -45,15 +45,18 @@ class JadwalController extends Controller
         $request->validate([
             'id_konseling' => 'required|exists:konseling,id_konseling',
             'tgl_sesi' => 'required|date|after_or_equal:today',
-            'waktu_mulai' => 'required',
-            'waktu_selesai' => 'required|after:waktu_mulai',
+            'waktu_mulai' => 'required|date_format:H:i',
+            'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
             'lokasi' => 'required|string|max:255',
             'jenis_sesi' => 'required|in:online,offline',
         ]);
+
         $user = Auth::user();
         if (!$user->dosen) {
             return back()->with('error', 'Profil dosen Anda tidak ditemukan.');
         }
+
+        // Tidak ada yang perlu diubah di sini, karena Model sudah diperbaiki
         JadwalKonseling::create([
             'id_konseling' => $request->id_konseling,
             'id_dosen_konseling' => $user->dosen->email_dos,
@@ -64,9 +67,11 @@ class JadwalController extends Controller
             'jenis_sesi' => $request->jenis_sesi,
             'status_sesi' => 'dijadwalkan',
         ]);
+
         $konseling = Konseling::find($request->id_konseling);
         $konseling->status_konseling = 'terjadwal';
         $konseling->save();
+
         return redirect()->route('dosen-konseling.jadwal.index')
             ->with('success', 'Jadwal konseling berhasil dibuat.');
     }
@@ -77,14 +82,10 @@ class JadwalController extends Controller
         return view('dosen-konseling.jadwal.mulai-sesi', compact('jadwal'));
     }
 
-    /**
-     * INI FUNGSI YANG SEBELUMNYA HILANG
-     * Menerima data dari form, memvalidasi, menyimpan, dan redirect.
-     */
     public function simpanSesi(Request $request, JadwalKonseling $jadwal): RedirectResponse
     {
         $request->validate([
-            'catatan_sesi' => 'required|string',
+            'catatan_sesi' => 'required|string|min:10',
             'rekomendasi' => 'nullable|string',
             'status_akhir' => 'required|in:tuntas,lanjutan',
         ]);
@@ -102,16 +103,18 @@ class JadwalController extends Controller
             $jadwal->status_sesi = 'selesai';
             $jadwal->save();
 
+            $konseling = $jadwal->konseling;
             // Jika 'tuntas', selesaikan juga kasus utamanya
             if ($request->status_akhir === 'tuntas') {
-                $konseling = $jadwal->konseling;
                 $konseling->status_konseling = 'selesai';
-                $konseling->save();
+            } else {
+                // Jika 'lanjutan', kembalikan status ke 'disetujui' agar bisa dijadwalkan lagi
+                $konseling->status_konseling = 'disetujui';
             }
+            $konseling->save();
         });
         
-        // Arahkan ke halaman Riwayat Kasus
-        return redirect()->route('dosen-konseling.kasus.index')
+        return redirect()->route('dosen-konseling.dashboard')
             ->with('success', 'Hasil sesi konseling berhasil disimpan.');
     }
 }

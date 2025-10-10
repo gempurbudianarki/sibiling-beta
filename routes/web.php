@@ -67,8 +67,9 @@ Route::middleware(['auth', 'verified', 'role:dosen_konseling'])->prefix('dosen-k
     // == INI RUTE PENTING YANG SUDAH ADA DI KODEMU ==
     Route::post('/jadwal/{jadwal}/simpan-sesi', [JadwalController::class, 'simpanSesi'])->name('jadwal.simpanSesi');
     
-    // Rute Kasus
+    // Rute Kasus (Riwayat Arsip)
     Route::get('/kasus', [KasusController::class, 'index'])->name('kasus.index');
+    Route::get('/kasus/{konseling}', [KasusController::class, 'show'])->name('kasus.show'); // Rute detail kasus
 });
 
 // Dosen Pembimbing Routes
@@ -91,4 +92,3 @@ Route::middleware(['auth', 'verified', 'role:mahasiswa'])->prefix('mahasiswa')->
 
 
 require __DIR__.'/auth.php';
-

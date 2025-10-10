@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HasilKonseling extends Model
 {
@@ -11,24 +12,16 @@ class HasilKonseling extends Model
 
     protected $table = 'hasil_konseling';
     protected $primaryKey = 'id_hasil';
+    public $incrementing = true;
 
-    // public $timestamps = false; // Baris ini kita hapus agar cocok dengan migrasi
-    
-    /**
-     * Kolom yang dapat diisi secara massal.
-     * Namanya disamakan dengan yang ada di Controller dan View.
-     */
     protected $fillable = [
         'id_jadwal',
-        'catatan_sesi', // Menggunakan 'catatan_sesi' agar konsisten
-        'rekomendasi',  // Menggunakan 'rekomendasi' agar konsisten
-        'status_akhir', // Menggunakan 'status_akhir' agar konsisten
+        'catatan_sesi',
+        'rekomendasi',
+        'status_akhir',
     ];
 
-    /**
-     * Relasi ke model JadwalKonseling.
-     */
-    public function jadwal()
+    public function jadwalKonseling(): BelongsTo
     {
         return $this->belongsTo(JadwalKonseling::class, 'id_jadwal', 'id_jadwal');
     }
