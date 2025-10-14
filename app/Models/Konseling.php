@@ -4,9 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany; // <-- Ubah import dari HasOne
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Konseling extends Model
 {
@@ -15,59 +12,55 @@ class Konseling extends Model
     protected $table = 'konseling';
     protected $primaryKey = 'id_konseling';
     public $timestamps = false;
-    public $incrementing = true;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    // === PENAMBAHAN KODE BARU DIMULAI DI SINI ===
     protected $fillable = [
         'nim_mahasiswa',
         'id_dosen_wali',
-        'id_dosen_konseling',
         'tgl_pengajuan',
+        'permasalahan',
         'status_konseling',
-        'sumber_pengajuan',
         'rekomendation_dari',
         'aspek_permasalahan',
         'permasalahan_segera',
         'upaya_dilakukan',
         'harapan_pa',
-        'permasalahan',
-        'harapan',
-        'alasan_penolakan',
+        'sumber_pengajuan',
+        'harapan_konseling',
+        'alasan_penolakan', // Kolom dari migrasi sebelumnya
+        // Kolom baru sesuai SOP
+        'bidang_layanan',
+        'jenis_konseli',
+        'sumber_rujukan',
+        'tujuan_konseling',
+        'deskripsi_masalah',
+        'hasil_asesmen',
+    ];
+    // === PENAMBAHAN KODE BARU SELESAI DI SINI ===
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'tgl_pengajuan' => 'date',
+        'aspek_permasalahan' => 'json',
+        'hasil_asesmen' => 'json', // Pastikan kolom asesmen juga di-cast sebagai json
     ];
 
-    public function mahasiswa(): BelongsTo
+    public function mahasiswa()
     {
         return $this->belongsTo(Mahasiswa::class, 'nim_mahasiswa', 'nim');
     }
 
-    public function dosenKonseling(): BelongsTo
+    public function jadwal()
     {
-        return $this->belongsTo(Dosen::class, 'id_dosen_konseling', 'email_dos');
-    }
-
-    /**
-     * ===================================================================
-     * PERBAIKAN: Mengubah relasi dari HasOne menjadi HasMany
-     * ===================================================================
-     * Satu Konseling bisa memiliki BANYAK JadwalKonseling.
-     */
-    public function jadwalKonseling(): HasMany
-    {
-        return $this->hasMany(JadwalKonseling::class, 'id_konseling', 'id_konseling');
-    }
-
-    /**
-     * Relasi ini tetap benar karena kita ingin mengambil 'satu hasil terakhir melalui banyak jadwal'.
-     * Namun, untuk kasus ini kita tidak menggunakannya secara langsung di detail view.
-     */
-    public function hasilKonseling(): HasOneThrough
-    {
-        return $this->hasOneThrough(
-            HasilKonseling::class,
-            JadwalKonseling::class,
-            'id_konseling',
-            'id_jadwal',
-            'id_konseling',
-            'id_jadwal'
-        );
+        return $this->hasOne(JadwalKonseling::class, 'id_konseling', 'id_konseling');
     }
 }

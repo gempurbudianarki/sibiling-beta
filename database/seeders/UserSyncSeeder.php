@@ -34,18 +34,16 @@ class UserSyncSeeder extends Seeder
 
         foreach ($dosenToSync as $dosen) {
             try {
-                // Gunakan updateOrCreate untuk mencegah duplikat dan memperbarui jika ada perubahan
-                User::updateOrCreate(
-                    ['email' => $dosen->email_dos], // Kunci untuk mencari
+                $user = User::updateOrCreate(
+                    ['email' => $dosen->email_dos],
                     [
                         'name' => $dosen->nm_dos,
-                        'username' => explode('@', $dosen->email_dos)[0], // Username dari bagian email
+                        'username' => explode('@', $dosen->email_dos)[0],
                         'password' => $hashedPassword,
                     ]
                 );
                 $dosenCount++;
             } catch (\Exception $e) {
-                // Log error jika ada email duplikat atau data tidak valid
                 Log::warning("Gagal menyinkronkan dosen: {$dosen->email_dos}. Error: " . $e->getMessage());
             }
         }
@@ -59,20 +57,23 @@ class UserSyncSeeder extends Seeder
 
         foreach ($mahasiswaToSync as $mahasiswa) {
             try {
-                // Cek email, jika kosong atau tidak valid, lewati.
                 if (empty($mahasiswa->email) || !filter_var($mahasiswa->email, FILTER_VALIDATE_EMAIL)) {
                     Log::warning("Email tidak valid atau kosong untuk NIM: {$mahasiswa->nim}. Dilewati.");
                     continue;
                 }
 
-                User::updateOrCreate(
+                $user = User::updateOrCreate( // <-- Simpan hasil ke variabel $user
                     ['email' => $mahasiswa->email],
                     [
                         'name' => $mahasiswa->nm_mhs,
-                        'username' => $mahasiswa->nim, // <-- NIM DIGUNAKAN SEBAGAI USERNAME DI SINI
+                        'username' => $mahasiswa->nim,
                         'password' => $hashedPassword,
                     ]
                 );
+
+                // Memberikan role 'mahasiswa' ke user yang baru dibuat/diupdate
+                $user->assignRole('mahasiswa');
+
                 $mahasiswaCount++;
             } catch (\Exception $e) {
                 Log::warning("Gagal menyinkronkan mahasiswa: {$mahasiswa->nim}. Error: " . $e->getMessage());
@@ -80,6 +81,7 @@ class UserSyncSeeder extends Seeder
         }
         $this->command->info("-> Selesai. {$mahasiswaCount} akun Mahasiswa berhasil disinkronkan.");
 
+        // === PERBAIKAN DI BARIS DI BAWAH INI ===
         $this->command->info("Sinkronisasi User Selesai!");
     }
 }

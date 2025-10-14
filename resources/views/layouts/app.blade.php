@@ -71,6 +71,18 @@
                         <span x-show="open" class="ml-3">Riwayat Kasus</span>
                     </a>
                 @endrole
+
+                {{-- ==== MENU UNTUK MAHASISWA ==== --}}
+                @role('mahasiswa')
+                    <a href="{{ route('mahasiswa.pengajuan.create') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg menu-hover {{ request()->routeIs('mahasiswa.pengajuan.create') ? 'menu-active' : '' }}">
+                        <svg class="h-5 w-5 text-lime-300" fill="currentColor" viewBox="0 0 24 24"><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path></svg>
+                        <span x-show="open" class="ml-3">Ajukan Konseling</span>
+                    </a>
+                    <a href="{{ route('mahasiswa.riwayat.index') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg menu-hover {{ request()->routeIs('mahasiswa.riwayat.*') ? 'menu-active' : '' }}">
+                        <svg class="h-5 w-5 text-lime-300" fill="currentColor" viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"></path></svg>
+                        <span x-show="open" class="ml-3">Riwayat Konseling</span>
+                    </a>
+                @endrole
             </nav>
 
             <div class="p-2 flex-shrink-0">
@@ -101,8 +113,8 @@
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <a href="{{ route('logout') }}"
-                                    onclick="event.preventDefault(); this.closest('form').submit();"
-                                    class="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-600">
+                                   onclick="event.preventDefault(); this.closest('form').submit();"
+                                   class="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-600">
                                 Log Out
                             </a>
                         </form>

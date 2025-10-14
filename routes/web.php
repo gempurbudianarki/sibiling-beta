@@ -22,12 +22,18 @@ use App\Http\Controllers\DosenKonseling\KasusController;
 use App\Http\Controllers\DosenPembimbing\MahasiswaBimbinganController;
 use App\Http\Controllers\DosenPembimbing\RekomendasiController;
 
+// Mahasiswa Feature Controllers
+use App\Http\Controllers\Mahasiswa\PengajuanController as MahasiswaPengajuanController;
+// === PENAMBAHAN KODE BARU DIMULAI DI SINI ===
+use App\Http\Controllers\Mahasiswa\RiwayatController as MahasiswaRiwayatController;
+// === PENAMBAHAN KODE BARU SELESAI DI SINI ===
+
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// The main dashboard route now acts as a dispatcher.
+// The main dashboard route now acts as a a dispatcher.
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
@@ -52,31 +58,21 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 // Dosen Konseling Routes
 Route::middleware(['auth', 'verified', 'role:dosen_konseling'])->prefix('dosen-konseling')->name('dosen-konseling.')->group(function () {
     Route::get('/dashboard', [DosenKonselingDashboardController::class, 'index'])->name('dashboard');
-    
-    // Rute Pengajuan
-    Route::get('/pengajuan', [PengajuanController::class, 'index'])->name('pengajuan.index'); 
+    Route::get('/pengajuan', [PengajuanController::class, 'index'])->name('pengajuan.index');
     Route::get('/pengajuan/{pengajuan}', [PengajuanController::class, 'show'])->name('pengajuan.show');
     Route::put('/pengajuan/{pengajuan}/status', [PengajuanController::class, 'updateStatus'])->name('pengajuan.updateStatus');
-
-    // Rute Jadwal
     Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
     Route::get('/jadwal/create/{pengajuan}', [JadwalController::class, 'create'])->name('jadwal.create');
     Route::post('/jadwal', [JadwalController::class, 'store'])->name('jadwal.store');
     Route::get('/jadwal/{jadwal}/mulai-sesi', [JadwalController::class, 'mulaiSesi'])->name('jadwal.mulaiSesi');
-
-    // == INI RUTE PENTING YANG SUDAH ADA DI KODEMU ==
     Route::post('/jadwal/{jadwal}/simpan-sesi', [JadwalController::class, 'simpanSesi'])->name('jadwal.simpanSesi');
-    
-    // Rute Kasus (Riwayat Arsip)
     Route::get('/kasus', [KasusController::class, 'index'])->name('kasus.index');
-    Route::get('/kasus/{konseling}', [KasusController::class, 'show'])->name('kasus.show'); // Rute detail kasus
+    Route::get('/kasus/{konseling}', [KasusController::class, 'show'])->name('kasus.show');
 });
 
 // Dosen Pembimbing Routes
 Route::middleware(['auth', 'verified', 'role:dosen_pembimbing'])->prefix('dosen-pembimbing')->name('dosen-pembimbing.')->group(function () {
     Route::get('/dashboard', [DosenPembimbingDashboardController::class, 'index'])->name('dashboard');
-    
-    // Rute untuk fitur Dosen Pembimbing
     Route::get('/mahasiswa', [MahasiswaBimbinganController::class, 'index'])->name('mahasiswa');
     Route::get('/rekomendasi', [RekomendasiController::class, 'index'])->name('rekomendasi.index');
     Route::get('/rekomendasi/create/{mahasiswa}', [RekomendasiController::class, 'create'])->name('rekomendasi.create');
@@ -88,6 +84,12 @@ Route::middleware(['auth', 'verified', 'role:dosen_pembimbing'])->prefix('dosen-
 // Mahasiswa Routes
 Route::middleware(['auth', 'verified', 'role:mahasiswa'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
     Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/pengajuan/create', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
+    Route::post('/pengajuan', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
+
+    // === PENAMBAHAN KODE BARU DIMULAI DI SINI ===
+    Route::get('/riwayat', [MahasiswaRiwayatController::class, 'index'])->name('riwayat.index');
+    // === PENAMBAHAN KODE BARU SELESAI DI SINI ===
 });
 
 
