@@ -1,64 +1,159 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="id">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIBILING UBBG | Login Konseling</title>
+  <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-cream: #FFFCF9;
+      --bg-green-light: #EAF7F2;
+      --bg-green-lighter: #F0FAF7;
+      --btn-green: #2BA172;
+      --btn-hover: #23865F;
+      --text-dark: #111827;
+      --text-gray: #6B7280;
+      --border-light: #E5E7EB;
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
 
-    <title>{{ config('app.name', 'SIBILING UBBG') }}</title>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--bg-green-light) 0%, #E0F0FF 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
 
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    /* === Kartu Utama === */
+    .main-container {
+      display: flex;
+      flex-wrap: wrap;
+      background: var(--bg-cream);
+      border-radius: 24px;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      max-width: 1200px;
+      width: 100%;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(25px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* === Kiri: Brand === */
+    .brand-section {
+      flex: 1;
+      background: linear-gradient(135deg, var(--bg-green-light) 0%, var(--bg-green-lighter) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      text-align: center;
+    }
+
+    .brand-section h1 {
+      font-weight: 800;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--text-dark);
+    }
+
+    .brand-section p {
+      color: var(--text-gray);
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    .brand-section img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* === Kanan: Form === */
+    .login-section {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      background: var(--bg-cream);
+    }
+
+    /* === Responsive === */
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+        border-radius: 18px;
+        max-width: 450px;
+      }
+
+      .brand-section {
+        padding: 2rem 1.5rem 1rem 1.5rem;
+        justify-content: flex-start; /* ⬅️ Biar gak terlalu tengah */
+      }
+
+      .brand-section img:first-child {
+        width: 70px;
+        margin-bottom: 0.8rem;
+      }
+
+      .brand-section h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.6rem;
+      }
+
+      .brand-section p {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+
+      .brand-section img:last-child {
+        width: 260px;
+        margin-top: 0.5rem;
+        margin-bottom: 0.2rem;
+      }
+
+      /* 🩵 Form sekarang langsung menempel di bawah */
+      .login-section {
+        padding: 1.5rem 1rem 2rem 1rem;
+        margin-top: 0; /* penting */
+      }
+    }
+
+    @media (max-width: 480px) {
+      .brand-section img:last-child {
+        width: 210px;
+      }
+    }
+  </style>
 </head>
-<body class="font-sans antialiased bg-gray-100">
-    <div class="min-h-screen flex">
-        <!-- ==================== BAGIAN KIRI (BRANDING KAMPUS) ==================== -->
-        <div class="hidden lg:flex w-1/2 relative">
-            
-            <!-- Background foto -->
-            <div class="absolute inset-0 bg-cover bg-center"
-                 style="background-image:url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1600&auto=format&fit=crop');">
-            </div>
 
-            <!-- Overlay gradient -->
-            <div class="absolute inset-0 bg-gradient-to-t from-indigo-900/85 via-indigo-800/70 to-transparent"></div>
-
-            <!-- Konten branding -->
-            <div class="relative flex flex-col justify-center items-center h-full w-full text-center text-white px-8">
-                
-                <!-- Logo -->
-                <div class="bg-white/90 p-3 rounded-full shadow-lg mb-6">
-                    <img src="{{ asset('images/logo-ubbg.png') }}" 
-                         alt="Logo UBBG" 
-                         class="h-20 w-20 drop-shadow-md">
-                </div>
-
-                <!-- Judul -->
-                <h1 class="text-4xl font-extrabold tracking-tight text-white">SIBILING UBBG</h1>
-
-                <!-- Subjudul -->
-                <p class="mt-3 text-lg text-gray-100">Sistem Informasi Bimbingan Konseling</p>
-
-                <!-- Slogan -->
-                <p class="mt-3 italic text-orange-400 font-medium">“Unggul, Mandiri dan Religius”</p>
-            </div>
-
-            <!-- Footer copyright di paling bawah -->
-            <div class="absolute bottom-6 inset-x-0 text-center text-xs text-gray-300 opacity-80">
-                © {{ date('Y') }} Universitas Bina Bangsa Getsempena
-            </div>
-        </div>
-
-        <!-- ==================== BAGIAN KANAN (FORM LOGIN / REGISTER) ==================== -->
-        <div class="flex w-full lg:w-1/2 items-center justify-center p-6 sm:p-10 bg-gray-50">
-            <div class="w-full max-w-md">
-                {{ $slot }}
-            </div>
-        </div>
+<body>
+  <div class="main-container">
+    <div class="brand-section">
+      <img src="{{ asset('images/logo-ubbg.png') }}" alt="Logo UBBG">
+      <h1>SIBILING UBBG</h1>
+      <p>Layanan Konseling Mahasiswa<br>Universitas Bina Bangsa Getsempena</p>
+      <img src="{{ asset('images/konseling.png') }}" alt="Ilustrasi Konseling">
     </div>
+
+    <div class="login-section">
+      {{ $slot }}
+    </div>
+  </div>
 </body>
 </html>
