@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Konseling; // Pastikan model Konseling di-import
-use Carbon\Carbon; // Kita butuh Carbon untuk mengelola tanggal
+use App\Models\Konseling;
+use App\Models\Dosen;
+use Carbon\Carbon;
 
 class PengajuanController extends Controller
 {
@@ -15,17 +16,14 @@ class PengajuanController extends Controller
      */
     public function create()
     {
-        // Mengecek apakah mahasiswa sudah punya pengajuan yang aktif (belum selesai)
         $activeCounseling = Konseling::where('nim_mahasiswa', Auth::user()->nim)
             ->whereNotIn('status_konseling', ['Selesai', 'Ditolak'])
             ->exists();
 
-        // Jika sudah ada, redirect ke dashboard dengan pesan error
         if ($activeCounseling) {
-            return redirect()->route('mahasiswa.dashboard')->with('error', 'Anda sudah memiliki sesi konseling yang aktif.');
+            return redirect()->route('mahasiswa.dashboard')->with('error', 'Anda sudah memiliki sesi konseling yang sedang aktif.');
         }
 
-        // Jika tidak ada, tampilkan form
         return view('mahasiswa.pengajuan.create');
     }
 
@@ -34,38 +32,55 @@ class PengajuanController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi input dari form
         $validated = $request->validate([
             'bidang_layanan' => 'required|string',
             'jenis_konseli' => 'required|in:baru,lama',
             'tujuan_konseling' => 'required|string|min:20',
             'deskripsi_masalah' => 'required|string|min:50',
-            'assessment' => 'required|array|size:10', // Memastikan 10 jawaban asesmen ada
-            'assessment.*' => 'required|string', // Memastikan setiap jawaban tidak kosong
+            'assessment' => 'required|array|size:10',
+            'assessment.*' => 'required|string',
+        ], [
+            'bidang_layanan.required' => 'Bidang layanan wajib dipilih.',
+            'jenis_konseli.required' => 'Mohon pilih apakah Anda konseli baru atau lama.',
+            'tujuan_konseling.min' => 'Tujuan konseling minimal harus 20 karakter.',
+            'deskripsi_masalah.min' => 'Deskripsi masalah minimal harus 50 karakter.',
+            'assessment.size' => 'Harap jawab semua 10 pertanyaan asesmen.',
         ]);
 
-        // Mengumpulkan jawaban asesmen menjadi satu array
+        $user = Auth::user();
+        $mahasiswa = $user->mahasiswa;
+
+        if (!$mahasiswa || !$mahasiswa->id_dosen_wali) {
+            return redirect()->back()->withInput()->with('error', 'Data Dosen Wali Anda tidak ditemukan. Silakan hubungi admin.');
+        }
+
+        $dosenWali = Dosen::find($mahasiswa->id_dosen_wali);
+
+        if (!$dosenWali) {
+             return redirect()->back()->withInput()->with('error', 'Data Dosen Wali yang terhubung dengan Anda tidak valid. Silakan hubungi admin.');
+        }
+
         $hasilAsesmen = [];
         foreach ($validated['assessment'] as $key => $value) {
             $hasilAsesmen['pertanyaan_' . ($key + 1)] = $value;
         }
 
-        // Simpan data ke database
         Konseling::create([
-            'nim_mahasiswa' => Auth::user()->nim,
-            'id_dosen_wali' => Auth::user()->mahasiswa->dosen_wali, // Asumsi relasi user->mahasiswa sudah ada
+            // === PERBAIKAN UTAMA DI SINI ===
+            // Mengambil NIM langsung dari objek $mahasiswa yang sudah valid.
+            'nim_mahasiswa' => $mahasiswa->nim,
+            'id_dosen_wali' => $dosenWali->email_dos,
             'tgl_pengajuan' => Carbon::now(),
             'status_konseling' => 'Menunggu Verifikasi',
-            'sumber_pengajuan' => 'mahasiswa', // Karena ini diajukan oleh mahasiswa
+            'sumber_pengajuan' => 'mahasiswa',
             'bidang_layanan' => $validated['bidang_layanan'],
             'jenis_konseli' => $validated['jenis_konseli'],
-            'sumber_rujukan' => 'sendiri', // Default 'sendiri' dari form mahasiswa
+            'sumber_rujukan' => 'sendiri',
             'tujuan_konseling' => $validated['tujuan_konseling'],
             'deskripsi_masalah' => $validated['deskripsi_masalah'],
-            'hasil_asesmen' => json_encode($hasilAsesmen), // Simpan sebagai JSON
+            'hasil_asesmen' => json_encode($hasilAsesmen),
         ]);
 
-        // Redirect ke dashboard dengan pesan sukses
-        return redirect()->route('mahasiswa.dashboard')->with('success', 'Pengajuan konseling Anda berhasil dikirim.');
+        return redirect()->route('mahasiswa.dashboard')->with('success', 'Pengajuan konseling Anda berhasil dikirim dan sedang menunggu verifikasi.');
     }
 }

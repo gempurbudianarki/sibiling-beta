@@ -10,20 +10,38 @@ use App\Models\Konseling;
 class RiwayatController extends Controller
 {
     /**
-     * Menampilkan daftar semua riwayat konseling mahasiswa.
+     * Menampilkan riwayat pengajuan konseling mahasiswa.
      */
     public function index()
     {
-        // Ambil NIM mahasiswa yang sedang login
+        // Mengambil NIM mahasiswa yang sedang login
         $nim = Auth::user()->nim;
 
-        // Ambil semua data konseling milik mahasiswa, urutkan dari yang terbaru
+        // Mengambil semua data konseling milik mahasiswa tersebut dari database,
+        // diurutkan berdasarkan tanggal pengajuan terbaru
         $riwayatKonseling = Konseling::where('nim_mahasiswa', $nim)
-                                     ->orderBy('tgl_pengajuan', 'desc')
-                                     ->paginate(10); // Kita gunakan pagination agar tidak berat jika data banyak
+            ->orderBy('tgl_pengajuan', 'desc')
+            ->get();
 
-        return view('mahasiswa.riwayat.index', [
-            'riwayat' => $riwayatKonseling
-        ]);
+        // Mengirim data riwayat ke view
+        return view('mahasiswa.riwayat.index', compact('riwayatKonseling'));
+    }
+
+    /**
+     * Menampilkan detail spesifik dari sebuah sesi konseling.
+     */
+    public function show(Konseling $konseling)
+    {
+        // Otorisasi: Pastikan konseling ini milik mahasiswa yang sedang login.
+        // Jika tidak, batalkan request.
+        if ($konseling->nim_mahasiswa !== Auth::user()->nim) {
+            abort(403, 'AKSES DITOLAK');
+        }
+
+        // Load relasi jadwal beserta dosen konselingnya untuk ditampilkan di view
+        $konseling->load('jadwal.dosenKonseling');
+
+        // Mengirim data konseling yang spesifik ke view 'show'
+        return view('mahasiswa.riwayat.show', compact('konseling'));
     }
 }

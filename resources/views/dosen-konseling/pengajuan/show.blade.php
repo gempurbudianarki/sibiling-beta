@@ -1,122 +1,60 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Detail Pengajuan Konseling
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Detail Pengajuan Konseling') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            <div class="md:col-span-1">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <h3 class="text-lg font-semibold border-b pb-2 mb-4">Data Mahasiswa</h3>
-                    <dl class="text-sm space-y-3">
-                        <div>
-                            <dt class="font-medium text-gray-500">Nama</dt>
-                            <dd class="text-gray-900">{{ $pengajuan->mahasiswa->nm_mhs ?? 'N/A' }}</dd>
-                        </div>
-                        <div>
-                            <dt class="font-medium text-gray-500">NIM</dt>
-                            <dd class="text-gray-900">{{ $pengajuan->nim_mahasiswa }}</dd>
-                        </div>
-                        <div>
-                            <dt class="font-medium text-gray-500">Program Studi</dt>
-                            <dd class="text-gray-900">{{ $pengajuan->mahasiswa->prodi->nm_prodi ?? 'N/A' }}</dd>
-                        </div>
-                        <div>
-                            <dt class="font-medium text-gray-500">Angkatan</dt>
-                            <dd class="text-gray-900">{{ $pengajuan->mahasiswa->angkatan ?? 'N/A' }}</dd>
-                        </div>
-                        <div>
-                            <dt class="font-medium text-gray-500">Dosen Wali</dt>
-                            <dd class="text-gray-900">{{ $pengajuan->mahasiswa->dosenWali->nm_dos ?? 'N/A' }}</dd>
-                        </div>
-                    </dl>
-                </div>
-            </div>
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 md:p-8 text-gray-900 dark:text-gray-100 space-y-8">
 
-            <div class="md:col-span-2">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <div class="border-b pb-2 mb-4">
-                        <h3 class="text-lg font-semibold">Detail Permasalahan</h3>
-                        <p class="text-sm text-gray-500">
-                            Diajukan oleh: 
-                            <span class="font-bold">
-                                {{ $pengajuan->sumber_pengajuan == 'dosen_pa' ? 'Dosen PA' : 'Mahasiswa' }}
-                            </span>
-                            pada {{ \Carbon\Carbon::parse($pengajuan->tgl_pengajuan)->translatedFormat('l, d F Y') }}
-                        </p>
+                    {{-- Tombol Kembali --}}
+                    <div>
+                        <a href="{{ route('dosen-konseling.pengajuan.index') }}" class="inline-flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                            Kembali ke Daftar Pengajuan
+                        </a>
+                    </div>
+                    
+                    {{-- Detail Pengajuan --}}
+                    <div class="border-b border-gray-200 dark:border-gray-700 pb-5">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">Informasi Pengajuan</h3>
+                        <dl class="mt-4 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                            <div class="sm:col-span-1"><dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Nama Mahasiswa</dt><dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ $pengajuan->mahasiswa->nm_mhs ?? 'N/A' }}</dd></div>
+                            <div class="sm:col-span-1"><dt class="text-sm font-medium text-gray-500 dark:text-gray-400">NIM</dt><dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ $pengajuan->nim_mahasiswa }}</dd></div>
+                            <div class="sm:col-span-1"><dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Tanggal Pengajuan</dt><dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ \Carbon\Carbon::parse($pengajuan->tgl_pengajuan)->translatedFormat('d F Y') }}</dd></div>
+                            <div class="sm:col-span-1"><dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Bidang Layanan</dt><dd class="mt-1 text-sm text-gray-900 dark:text-gray-200 capitalize">{{ $pengajuan->bidang_layanan ?: '-' }}</dd></div>
+                            <div class="sm:col-span-2"><dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Tujuan Konseling</dt><dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ $pengajuan->tujuan_konseling ?: '-' }}</dd></div>
+                            <div class="sm:col-span-2"><dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Deskripsi Masalah</dt><dd class="mt-1 text-sm text-gray-900 dark:text-gray-200">{{ $pengajuan->deskripsi_masalah ?: '-' }}</dd></div>
+                        </dl>
                     </div>
 
-                    <div class="space-y-6 text-sm">
-                        
-                        {{-- Tampilkan Detail Sesuai Sumber Pengajuan --}}
-                        @if ($pengajuan->sumber_pengajuan == 'dosen_pa')
-                            <div>
-                                <p class="font-medium text-gray-500">Aspek Permasalahan</p>
-                                <div class="flex flex-wrap gap-2 mt-1">
-                                    @foreach (json_decode($pengajuan->aspek_permasalahan) ?? [] as $aspek)
-                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">{{ ucfirst($aspek) }}</span>
-                                    @endforeach
-                                </div>
-                            </div>
-                            <div>
-                                <p class="font-medium text-gray-500">Permasalahan yang Perlu Segera Diatasi</p>
-                                <p class="text-gray-900 bg-gray-50 p-3 rounded-md whitespace-pre-wrap">{{ $pengajuan->permasalahan_segera ?? 'Tidak ada data.' }}</p>
-                            </div>
-                             <div>
-                                <p class="font-medium text-gray-500">Upaya yang Sudah Dilakukan Dosen PA</p>
-                                <p class="text-gray-900 bg-gray-50 p-3 rounded-md whitespace-pre-wrap">{{ $pengajuan->upaya_dilakukan ?? 'Tidak ada data.' }}</p>
-                            </div>
-                             <div>
-                                <p class="font-medium text-gray-500">Harapan Dosen PA</p>
-                                <p class="text-gray-900 bg-gray-50 p-3 rounded-md whitespace-pre-wrap">{{ $pengajuan->harapan_pa ?? 'Tidak ada data.' }}</p>
-                            </div>
-                        @else
-                            {{-- Tampilan jika pengajuan dari mahasiswa --}}
-                            <div>
-                                <p class="font-medium text-gray-500">Keluhan yang Disampaikan Mahasiswa</p>
-                                <p class="text-gray-900 bg-gray-50 p-3 rounded-md whitespace-pre-wrap">{{ $pengajuan->permasalahan ?? 'Tidak ada deskripsi.' }}</p>
-                            </div>
-                        @endif
+                    {{-- Form Persetujuan --}}
+                    <div x-data="{ showModal: false }">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">Persetujuan Pengajuan</h3>
+                        @if(in_array($pengajuan->status_konseling, ['Menunggu Verifikasi', 'pending']))
+                        <form id="approvalForm" action="{{ route('dosen-konseling.pengajuan.updateStatus', $pengajuan->id_konseling) }}" method="POST" class="mt-4">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="status" id="statusInput">
+                            
+                            {{-- Modal untuk alasan penolakan --}}
+                            <div x-show="showModal" class="fixed z-10 inset-0 overflow-y-auto" style="display: none;"></div>
 
-                        @if ($pengajuan->status_konseling == 'menunggu_verifikasi')
-                            <div class="border-t pt-4 mt-6">
-                                <h4 class="font-semibold mb-2">Tindakan Verifikasi</h4>
-                                <form action="{{ route('dosen-konseling.pengajuan.updateStatus', $pengajuan->id_konseling) }}" method="POST">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="flex items-center space-x-4">
-                                        <button type="submit" name="status" value="diterima" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-                                            Setujui & Jadwalkan
-                                        </button>
-                                        <button type="submit" name="status" value="ditolak" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
-                                            Tolak
-                                        </button>
-                                    </div>
-                                    <div class="mt-4">
-                                        <label for="alasan_penolakan" class="block text-sm font-medium text-gray-700">Alasan Penolakan (jika ditolak)</label>
-                                        <textarea name="alasan_penolakan" id="alasan_penolakan" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
-                                    </div>
-                                </form>
+                            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 text-right sm:px-8 -mx-8 -mb-8 rounded-b-lg">
+                                {{-- === PERBAIKAN VALUE DI SINI === --}}
+                                <button type="button" @click="showModal = true" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring ring-red-300 disabled:opacity-25 transition ease-in-out duration-150">Tolak</button>
+                                <button type="submit" onclick="document.getElementById('statusInput').value='disetujui';" class="ml-4 inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">Setujui Pengajuan</button>
                             </div>
+                        </form>
                         @else
-                             <div class="border-t pt-4 mt-6">
-                                <h4 class="font-semibold mb-2">Status Pengajuan</h4>
-                                <p class="px-3 py-2 inline-flex text-sm leading-5 font-semibold rounded-full 
-                                    @if($pengajuan->status_konseling == 'disetujui' || $pengajuan->status_konseling == 'terjadwal') bg-blue-100 text-blue-800 @endif
-                                    @if($pengajuan->status_konseling == 'selesai') bg-green-100 text-green-800 @endif
-                                    @if($pengajuan->status_konseling == 'ditolak') bg-red-100 text-red-800 @endif
-                                ">
-                                    {{ ucfirst(str_replace('_', ' ', $pengajuan->status_konseling)) }}
-                                </p>
-                             </div>
+                        <div class="mt-4 p-4 bg-blue-50 border-blue-200 rounded-md"><p class="text-sm text-blue-700">Status pengajuan ini adalah <span class="font-semibold">{{ $pengajuan->status_konseling }}</span>.</p></div>
                         @endif
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </x-app-layout>

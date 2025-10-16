@@ -24,9 +24,7 @@ use App\Http\Controllers\DosenPembimbing\RekomendasiController;
 
 // Mahasiswa Feature Controllers
 use App\Http\Controllers\Mahasiswa\PengajuanController as MahasiswaPengajuanController;
-// === PENAMBAHAN KODE BARU DIMULAI DI SINI ===
 use App\Http\Controllers\Mahasiswa\RiwayatController as MahasiswaRiwayatController;
-// === PENAMBAHAN KODE BARU SELESAI DI SINI ===
 
 
 Route::get('/', function () {
@@ -87,8 +85,9 @@ Route::middleware(['auth', 'verified', 'role:mahasiswa'])->prefix('mahasiswa')->
     Route::get('/pengajuan/create', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
     Route::post('/pengajuan', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
 
-    // === PENAMBAHAN KODE BARU DIMULAI DI SINI ===
     Route::get('/riwayat', [MahasiswaRiwayatController::class, 'index'])->name('riwayat.index');
+    // === PENAMBAHAN KODE BARU DIMULAI DI SINI ===
+    Route::get('/riwayat/{konseling}', [MahasiswaRiwayatController::class, 'show'])->name('riwayat.show');
     // === PENAMBAHAN KODE BARU SELESAI DI SINI ===
 });
 

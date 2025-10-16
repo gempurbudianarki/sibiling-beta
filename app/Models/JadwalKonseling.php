@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class JadwalKonseling extends Model
 {
@@ -15,35 +15,28 @@ class JadwalKonseling extends Model
     protected $primaryKey = 'id_jadwal';
     public $timestamps = false;
 
-    /**
-     * ===================================================================
-     * PERBAIKAN FINAL: Melengkapi $fillable sesuai skema dan controller
-     * ===================================================================
-     */
     protected $fillable = [
         'id_konseling',
         'id_dosen_konseling',
-        'tgl_sesi',
+        'tgl_sesi', // Nama yang benar
         'waktu_mulai',
         'waktu_selesai',
-        'lokasi',
-        'jenis_sesi',
-        'status_sesi',
+        'lokasi', // Nama yang benar
+        'status_sesi', // Nama yang benar
     ];
 
-    /**
-     * Relasi inverse ke Konseling.
-     */
     public function konseling(): BelongsTo
     {
         return $this->belongsTo(Konseling::class, 'id_konseling', 'id_konseling');
     }
 
-    /**
-     * Relasi ke HasilKonseling.
-     */
     public function hasilKonseling(): HasOne
     {
         return $this->hasOne(HasilKonseling::class, 'id_jadwal', 'id_jadwal');
+    }
+    
+    public function dosenKonseling(): BelongsTo
+    {
+        return $this->belongsTo(Dosen::class, 'id_dosen_konseling', 'email_dos');
     }
 }
