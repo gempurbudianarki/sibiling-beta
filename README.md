@@ -94,5 +94,4 @@ Tabel utama meliputi:
 
 ---
 
-### 🐍 Animasi Ular (Game Snake)
-![Snake Can Be Completed](https://upload.wikimedia.org/wikipedia/commons/f/f8/Snake_can_be_completed.gif)
+
