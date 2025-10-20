@@ -56,39 +56,24 @@
                 </div>
             @endif
 
-            {{-- Progress Steps --}}
             <div class="mb-8">
-                <div class="flex items-center justify-center">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center">
-                            <span class="text-white text-sm font-semibold">1</span>
-                        </div>
-                        <div class="ml-3 text-sm font-medium text-indigo-600">Informasi Pengajuan</div>
-                    </div>
-                    <div class="flex-1 h-1 bg-gray-200 mx-4"></div>
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                            <span class="text-gray-600 text-sm font-semibold">2</span>
-                        </div>
-                        <div class="ml-3 text-sm font-medium text-gray-500">Asesmen Singkat</div>
-                    </div>
+                <div class="border border-gray-200 rounded-xl p-4">
+                    <p class="text-center font-semibold text-gray-800">Formulir Pengajuan Bimbingan Konseling</p>
                 </div>
             </div>
 
             <form action="{{ route('mahasiswa.pengajuan.store') }}" method="POST" x-data="{ submitting: false }" @submit="submitting = true">
                 @csrf
                 
-                {{-- BAGIAN 1: INFORMASI PENGAJUAN --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
-                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
-                        <h3 class="text-lg font-semibold text-white">Informasi Pengajuan</h3>
-                        <p class="text-indigo-100 text-sm mt-1">
+                    <div class="bg-gray-50 px-6 py-4 border-b">
+                        <h3 class="text-lg font-semibold text-gray-800">Informasi Pengajuan</h3>
+                        <p class="text-gray-500 text-sm mt-1">
                             Silakan isi formulir di bawah ini dengan sejujur-jujurnya. Kerahasiaan data Anda terjamin.
                         </p>
                     </div>
 
                     <div class="p-6 space-y-6">
-                        {{-- Bidang Layanan --}}
                         <div class="space-y-3">
                             <label for="bidang_layanan" class="block text-sm font-semibold text-gray-900">
                                 Bidang Layanan Konseling <span class="text-red-500">*</span>
@@ -102,7 +87,6 @@
                             </select>
                         </div>
 
-                        {{-- Jenis Konseli --}}
                         <div class="space-y-3">
                             <label class="block text-sm font-semibold text-gray-900">
                                 Apakah Anda pernah melakukan konseling di UPBK UBBG sebelumnya? <span class="text-red-500">*</span>
@@ -129,7 +113,6 @@
                             </div>
                         </div>
 
-                        {{-- Tujuan Konseling --}}
                         <div class="space-y-3">
                             <label for="tujuan_konseling" class="block text-sm font-semibold text-gray-900">
                                 Jelaskan secara singkat tujuan Anda membutuhkan layanan bimbingan konseling <span class="text-red-500">*</span>
@@ -137,7 +120,6 @@
                             <textarea id="tujuan_konseling" name="tujuan_konseling" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 resize-none shadow-sm" placeholder="Contoh: Saya ingin mendapatkan bantuan dalam mengelola stres akademik..." required>{{ old('tujuan_konseling') }}</textarea>
                         </div>
 
-                        {{-- Deskripsi Masalah --}}
                         <div class="space-y-3">
                             <label for="deskripsi_masalah" class="block text-sm font-semibold text-gray-900">
                                 Jelaskan secara singkat kondisi Anda saat ini (keluhan/permasalahan) <span class="text-red-500">*</span>
@@ -147,11 +129,10 @@
                     </div>
                 </div>
 
-                {{-- BAGIAN 2: ASESMEN SINGKAT --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
-                        <h3 class="text-lg font-semibold text-white">Asesmen Singkat</h3>
-                        <p class="text-indigo-100 text-sm mt-1">
+                    <div class="bg-gray-50 px-6 py-4 border-b">
+                        <h3 class="text-lg font-semibold text-gray-800">Asesmen Singkat</h3>
+                        <p class="text-gray-500 text-sm mt-1">
                             Pertanyaan berikut menanyakan bagaimana perasaan Anda dalam sebulan terakhir. Pilih jawaban yang paling sesuai.
                         </p>
                     </div>
@@ -183,7 +164,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
                                     @foreach ($answers as $answer)
                                     <label class="relative flex cursor-pointer">
-                                        <input type="radio" class="sr-only peer" name="assessment[{{ $index - 1 }}]" value="{{ $answer }}" {{ old('assessment.' . ($index - 1)) == $answer ? 'checked' : '' }} required>
+                                        <input type="radio" class="sr-only peer" name="assessment[{{ $index }}]" value="{{ $answer }}" {{ old('assessment.' . $index) == $answer ? 'checked' : '' }} required>
                                         <div class="w-full p-3 text-center border-2 border-gray-200 rounded-lg peer-checked:border-indigo-500 peer-checked:bg-indigo-500 peer-checked:text-white transition-all duration-200 hover:border-gray-300">
                                             <span class="text-sm font-medium">{{ $answer }}</span>
                                         </div>
@@ -196,15 +177,14 @@
                     </div>
                 </div>
 
-                {{-- BAGIAN 3: TOMBOL AKSI --}}
                 <div class="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <a href="{{ route('mahasiswa.dashboard') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-white border border-gray-300 rounded-xl font-semibold text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 text-sm">
+                    <a href="{{ route('dashboard') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-white border border-gray-300 rounded-xl font-semibold text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 text-sm">
                         <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         Kembali ke Dashboard
                     </a>
-                    <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 border border-transparent rounded-xl font-semibold text-white uppercase tracking-widest shadow-sm hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-200 text-sm" ::disabled="submitting">
+                    <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 border border-transparent rounded-xl font-semibold text-white uppercase tracking-widest shadow-sm hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-200 text-sm" :disabled="submitting">
                         <span x-show="!submitting" class="flex items-center">
                             <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -223,21 +203,4 @@
             </form>
         </div>
     </div>
-
-    <style>
-        select:focus, textarea:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-        
-        .peer:checked ~ div {
-            border-color: #4f46e5;
-            background-color: #eef2ff;
-        }
-        
-        .peer:checked ~ div > div > div {
-            border-color: #4f46e5;
-            background-color: #4f46e5;
-        }
-    </style>
 </x-app-layout>

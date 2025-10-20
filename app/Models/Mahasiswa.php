@@ -16,6 +16,8 @@ class Mahasiswa extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
+    // Dengan guarded kosong, semua atribut bisa diisi secara massal.
+    // Ini lebih fleksibel daripada mendaftarkan satu per satu di $fillable.
     protected $guarded = [];
 
     public function prodi(): BelongsTo

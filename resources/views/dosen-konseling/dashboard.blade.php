@@ -7,69 +7,32 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <span class="block sm:inline">{{ session('success') }}</span>
-                </div>
-            @endif
-
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-semibold mb-4">Pengajuan Konseling Baru</h3>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Nama Mahasiswa
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        NIM / Prodi
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Tanggal Pengajuan
-                                    </th>
-                                    <th scope="col" class="relative px-6 py-3">
-                                        <span class="sr-only">Aksi</span>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse ($pengajuanBaru as $konseling)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-gray-900">
-                                                {{ $konseling->mahasiswa->nm_mhs ?? 'N/A' }}
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900">{{ $konseling->nim_mahasiswa }}</div>
-                                            <div class="text-sm text-gray-500">{{ $konseling->mahasiswa->prodi->nm_prodi ?? 'Prodi tidak diketahui' }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ \Carbon\Carbon::parse($konseling->tgl_pengajuan)->translatedFormat('d M Y') }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <a href="{{ route('dosen-konseling.pengajuan.show', $konseling->id_konseling) }}" class="text-indigo-600 hover:text-indigo-900">Lihat & Verifikasi</a>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                                            Tidak ada pengajuan konseling baru.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">
+                        Selamat Datang, {{ Auth::user()->name }}!
+                    </h3>
+                    <p class="text-sm text-gray-600">Berikut adalah ringkasan aktivitas Anda hari ini.</p>
 
-                    <div class="mt-4">
-                        {{ $pengajuanBaru->links() }}
-                    </div>
+                    {{-- ================== KARTU STATISTIK ================== --}}
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-r-lg">
+                            <h4 class="text-3xl font-bold text-yellow-800">{{ $jumlahPengajuanBaru }}</h4>
+                            <p class="text-sm font-semibold text-yellow-700 mt-1">Pengajuan Baru Menunggu Verifikasi</p>
+                            <a href="{{ route('dosen-konseling.pengajuan.index') }}" class="text-sm text-yellow-900 hover:underline mt-4 inline-block">
+                                Lihat Semua Pengajuan &rarr;
+                            </a>
+                        </div>
 
+                        <div class="bg-green-50 border-l-4 border-green-400 p-6 rounded-r-lg">
+                            <h4 class="text-3xl font-bold text-green-800">{{ $jadwalHariIni }}</h4>
+                            <p class="text-sm font-semibold text-green-700 mt-1">Jadwal Sesi Konseling Hari Ini</p>
+                             <a href="{{ route('dosen-konseling.jadwal.index') }}" class="text-sm text-green-900 hover:underline mt-4 inline-block">
+                                Buka Jadwal Saya &rarr;
+                            </a>
+                        </div>
+                    </div>
+                    {{-- ======================================================== --}}
                 </div>
             </div>
         </div>

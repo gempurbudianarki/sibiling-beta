@@ -7,79 +7,82 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            {{-- Pesan Sukses --}}
+            @if (session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong class="font-bold">Berhasil!</strong>
+                    <span class="block sm:inline">{{ session('success') }}</span>
+                </div>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <div class="mb-4 flex justify-end">
-                        <a href="{{ route('dosen-pembimbing.rekomendasi') }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
-                            {{ __('+ Rekomendasikan Konseling') }}
-                        </a>
-                    </div>
-                    
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Daftar Mahasiswa di Bawah Bimbingan Anda</h3>
+
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
-                            <thead class="ltr:text-left rtl:text-right">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         NIM
                                     </th>
-                                    <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Nama Mahasiswa
                                     </th>
-                                    <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Program Studi
                                     </th>
-                                    <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                                        Angkatan
+                                    {{-- ================== KOLOM BARU DITAMBAHKAN DI SINI ================== --}}
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status Konseling Terakhir
                                     </th>
-                                    <th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
-                                        Status Konseling
+                                    {{-- ==================================================================== --}}
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Aksi
                                     </th>
-                                    <th class="px-4 py-2"></th>
                                 </tr>
                             </thead>
-
-                            <tbody class="divide-y divide-gray-200">
-                                @forelse ($mahasiswaBimbingan as $mahasiswa)
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @forelse ($mahasiswaWali as $mahasiswa)
                                     <tr>
-                                        <td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $mahasiswa->nim }}
                                         </td>
-                                        <td class="whitespace-nowrap px-4 py-2 text-gray-700">
-                                            {{ $mahasiswa->nm_mhs }}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {{ $mahasiswa->user->name ?? $mahasiswa->nama_mhs }}
                                         </td>
-                                        <td class="whitespace-nowrap px-4 py-2 text-gray-700">
-                                            {{ $mahasiswa->prodi ? $mahasiswa->prodi->nm_prodi : 'N/A' }}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $mahasiswa->prodi->nama_prodi ?? 'N/A' }}
                                         </td>
-                                        <td class="whitespace-nowrap px-4 py-2 text-gray-700">
-                                            {{ $mahasiswa->angkatan }}
+                                        {{-- ================== LOGIKA PENAMPILAN STATUS DIMULAI DI SINI ================== --}}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            @if ($mahasiswa->konseling->isNotEmpty())
+                                                {{-- Ambil record konseling paling baru berdasarkan tanggal pengajuan --}}
+                                                @php
+                                                    $konselingTerbaru = $mahasiswa->konseling->sortByDesc('tgl_pengajuan')->first();
+                                                @endphp
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                    {{ $konselingTerbaru->status_konseling }}
+                                                </span>
+                                            @else
+                                                <span class="text-gray-400 italic">Belum ada riwayat</span>
+                                            @endif
                                         </td>
-                                        <td class="whitespace-nowrap px-4 py-2 text-gray-700">
-                                            <span class="inline-flex items-center justify-center rounded-full bg-gray-100 px-2.5 py-0.5 text-gray-700">
-                                                <p class="whitespace-nowrap text-sm">Belum Ada</p>
-                                            </span>
-                                        </td>
-                                        <td class="whitespace-nowrap px-4 py-2">
-                                            <a href="#" class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700">
-                                                Lihat Riwayat
-                                            </a>
+                                        {{-- =================== LOGIKA PENAMPILAN STATUS SELESAI DI SINI =================== --}}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <a href="{{ route('dosen-pembimbing.rekomendasi.create', $mahasiswa->nim) }}" class="text-indigo-600 hover:text-indigo-900">Rekomendasikan</a>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="whitespace-nowrap px-4 py-2 text-center text-gray-500">
-                                            Tidak ada data mahasiswa bimbingan.
+                                        <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                            Tidak ada mahasiswa bimbingan yang ditemukan.
                                         </td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
-
-                    {{-- Link Paginasi --}}
-                    <div class="mt-4">
-                        {{ $mahasiswaBimbingan->links() }}
-                    </div>
-
                 </div>
             </div>
         </div>

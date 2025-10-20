@@ -2,42 +2,28 @@
 
 namespace App\Http\Controllers\DosenPembimbing;
 
-use App\Models\Dosen;
-use App\Models\Mahasiswa;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class MahasiswaBimbinganController extends Controller
 {
     /**
-     * Menampilkan daftar mahasiswa bimbingan.
+     * Menampilkan daftar mahasiswa bimbingan beserta status konseling terakhir mereka.
      */
-    public function index(): View
+    public function index()
     {
-        // 1. Ambil user yang sedang login
-        $user = Auth::user();
-        
-        // 2. Cari profil dosen berdasarkan email user yang login
-        // Kita gunakan find() karena primaryKey di model Dosen adalah 'email_dos'
-        $dosen = Dosen::find($user->email);
+        // 1. Ambil data dosen yang sedang login
+        $dosen = Auth::user()->dosen;
 
-        // Inisialisasi paginator kosong
-        $mahasiswaBimbingan = new LengthAwarePaginator([], 0, 15);
+        // ================== PENYEMPURNAAN QUERY DIMULAI DI SINI ==================
+        // 2. Ambil semua mahasiswa yang menjadi walinya.
+        //    Gunakan 'with('konseling')' untuk mengambil relasi data konseling secara efisien (Eager Loading).
+        //    Ini akan mengambil semua riwayat konseling untuk semua mahasiswa wali dalam satu query tambahan.
+        $mahasiswaWali = $dosen->mahasiswaWali()->with('konseling', 'prodi')->get();
+        // =================== PENYEMPURNAAN QUERY SELESAI DI SINI ===================
 
-        // 3. Jika profil dosen ditemukan, baru kita cari mahasiswa bimbingannya
-        if ($dosen) {
-            // Langsung query ke model Mahasiswa
-            // cari semua yang kolom 'id_dosen_wali'-nya cocok dengan 'email_dos' dosen ini
-            $mahasiswaBimbingan = Mahasiswa::where('id_dosen_wali', $dosen->getKey())
-                ->with('prodi', 'konseling') // Eager load prodi dan riwayat konseling
-                ->orderBy('angkatan', 'desc')
-                ->orderBy('nm_mhs', 'asc')
-                ->paginate(15);
-        }
-
-        return view('dosen-pembimbing.mahasiswa.index', compact('mahasiswaBimbingan'));
+        // 3. Kirim data yang sudah lengkap ke view
+        return view('dosen-pembimbing.mahasiswa', compact('mahasiswaWali'));
     }
 }

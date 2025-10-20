@@ -2,16 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardController; // Controller utama kita
 use App\Http\Controllers\DosenController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\Admin\RoleAssignmentController;
-
-// Role-specific Controllers
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\DosenKonseling\DashboardController as DosenKonselingDashboardController;
-use App\Http\Controllers\DosenPembimbing\DashboardController as DosenPembimbingDashboardController;
-use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
 
 // Dosen Konseling Feature Controllers
 use App\Http\Controllers\DosenKonseling\PengajuanController;
@@ -26,15 +20,15 @@ use App\Http\Controllers\DosenPembimbing\RekomendasiController;
 use App\Http\Controllers\Mahasiswa\PengajuanController as MahasiswaPengajuanController;
 use App\Http\Controllers\Mahasiswa\RiwayatController as MahasiswaRiwayatController;
 
-
 Route::get('/', function () {
     return view('welcome');
 });
 
-// The main dashboard route now acts as a a dispatcher.
+// ================== INI ADALAH SATU-SATUNYA RUTE DASHBOARD YANG KITA PAKAI ==================
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+// =========================================================================================
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -44,7 +38,7 @@ Route::middleware('auth')->group(function () {
 
 // Admin Routes
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    // Route::get('/dashboard', ...) DIHAPUS DARI SINI
     Route::resource('dosen', DosenController::class);
     Route::resource('mahasiswa', MahasiswaController::class);
 
@@ -55,7 +49,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
 // Dosen Konseling Routes
 Route::middleware(['auth', 'verified', 'role:dosen_konseling'])->prefix('dosen-konseling')->name('dosen-konseling.')->group(function () {
-    Route::get('/dashboard', [DosenKonselingDashboardController::class, 'index'])->name('dashboard');
+    // Route::get('/dashboard', ...) DIHAPUS DARI SINI
     Route::get('/pengajuan', [PengajuanController::class, 'index'])->name('pengajuan.index');
     Route::get('/pengajuan/{pengajuan}', [PengajuanController::class, 'show'])->name('pengajuan.show');
     Route::put('/pengajuan/{pengajuan}/status', [PengajuanController::class, 'updateStatus'])->name('pengajuan.updateStatus');
@@ -70,7 +64,7 @@ Route::middleware(['auth', 'verified', 'role:dosen_konseling'])->prefix('dosen-k
 
 // Dosen Pembimbing Routes
 Route::middleware(['auth', 'verified', 'role:dosen_pembimbing'])->prefix('dosen-pembimbing')->name('dosen-pembimbing.')->group(function () {
-    Route::get('/dashboard', [DosenPembimbingDashboardController::class, 'index'])->name('dashboard');
+    // Route::get('/dashboard', ...) DIHAPUS DARI SINI
     Route::get('/mahasiswa', [MahasiswaBimbinganController::class, 'index'])->name('mahasiswa');
     Route::get('/rekomendasi', [RekomendasiController::class, 'index'])->name('rekomendasi.index');
     Route::get('/rekomendasi/create/{mahasiswa}', [RekomendasiController::class, 'create'])->name('rekomendasi.create');
@@ -81,15 +75,12 @@ Route::middleware(['auth', 'verified', 'role:dosen_pembimbing'])->prefix('dosen-
 
 // Mahasiswa Routes
 Route::middleware(['auth', 'verified', 'role:mahasiswa'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
-    Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
+    // Route::get('/dashboard', ...) DIHAPUS DARI SINI
     Route::get('/pengajuan/create', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
     Route::post('/pengajuan', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
 
     Route::get('/riwayat', [MahasiswaRiwayatController::class, 'index'])->name('riwayat.index');
-    // === PENAMBAHAN KODE BARU DIMULAI DI SINI ===
     Route::get('/riwayat/{konseling}', [MahasiswaRiwayatController::class, 'show'])->name('riwayat.show');
-    // === PENAMBAHAN KODE BARU SELESAI DI SINI ===
 });
-
 
 require __DIR__.'/auth.php';
