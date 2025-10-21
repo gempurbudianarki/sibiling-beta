@@ -13,19 +13,14 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     * This method acts as a dispatcher based on the user's role.
-     */
     public function index()
     {
         $user = Auth::user();
         $data = [];
 
         if ($user->hasRole('mahasiswa')) {
-            $nim = $user->mahasiswa->nim;
-            $data['konselingTerakhir'] = Konseling::where('nim_mahasiswa', $nim)
-                                                  ->with('jadwal')
+            $data['konselingTerakhir'] = Konseling::where('nim_mahasiswa', $user->mahasiswa->nim)
+                                                  ->with('jadwalSesi')
                                                   ->latest('tgl_pengajuan')
                                                   ->first();
             return view('mahasiswa.dashboard', $data);
@@ -33,9 +28,15 @@ class DashboardController extends Controller
 
         if ($user->hasRole('dosen_konseling')) {
             $data['jumlahPengajuanBaru'] = Konseling::where('status_konseling', 'Menunggu Verifikasi')->count();
+            
+            // ================== PERBAIKAN LOGIKA QUERY DI SINI ==================
+            // Hitung jadwal hari ini yang BELUM memiliki hasil konseling (yang masih aktif)
             $data['jadwalHariIni'] = JadwalKonseling::where('id_dosen_konseling', $user->email)
                                                     ->whereDate('waktu_mulai', Carbon::today())
+                                                    ->whereDoesntHave('hasilKonseling') // <-- Logika Kunci
                                                     ->count();
+            // ====================================================================
+
             return view('dosen-konseling.dashboard', $data);
         }
 
@@ -56,10 +57,6 @@ class DashboardController extends Controller
             return view('admin.dashboard', $data);
         }
 
-        // ================== PERBAIKAN FALLBACK DI SINI ==================
-        // Jika pengguna tidak memiliki peran yang terdefinisi di atas,
-        // arahkan mereka ke halaman profil mereka. Ini jauh lebih aman.
         return redirect()->route('profile.edit');
-        // ===============================================================
     }
 }

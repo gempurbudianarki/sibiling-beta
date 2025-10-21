@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne; // <-- TAMBAHKAN IMPORT INI
 
 class JadwalKonseling extends Model
 {
@@ -17,12 +17,17 @@ class JadwalKonseling extends Model
 
     protected $fillable = [
         'id_konseling',
-        'id_dosen_konseling',
-        'tgl_sesi', // Nama yang benar
+        'tgl_sesi',
         'waktu_mulai',
         'waktu_selesai',
-        'lokasi', // Nama yang benar
-        'status_sesi', // Nama yang benar
+        'lokasi',
+        'id_dosen_konseling',
+        'metode_konseling',
+    ];
+
+    protected $casts = [
+        'waktu_mulai' => 'datetime',
+        'waktu_selesai' => 'datetime',
     ];
 
     public function konseling(): BelongsTo
@@ -30,13 +35,18 @@ class JadwalKonseling extends Model
         return $this->belongsTo(Konseling::class, 'id_konseling', 'id_konseling');
     }
 
+    public function dosenKonseling(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id_dosen_konseling', 'email');
+    }
+
+    // ================== RELASI BARU DITAMBAHKAN DI SINI ==================
+    /**
+     * Get the hasil konseling record associated with the jadwal.
+     */
     public function hasilKonseling(): HasOne
     {
         return $this->hasOne(HasilKonseling::class, 'id_jadwal', 'id_jadwal');
     }
-    
-    public function dosenKonseling(): BelongsTo
-    {
-        return $this->belongsTo(Dosen::class, 'id_dosen_konseling', 'email_dos');
-    }
+    // ====================================================================
 }

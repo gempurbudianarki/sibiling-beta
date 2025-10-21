@@ -7,8 +7,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            {{-- ================== BLOK NOTIFIKASI BARU DIMULAI DI SINI ================== --}}
-            {{-- Pesan Sukses (Hijau) --}}
+            {{-- Notifikasi Sukses dan Error --}}
             @if (session('success'))
                 <div class="mb-4 bg-green-50 border-l-4 border-green-400 p-4" role="alert">
                     <div class="flex">
@@ -20,8 +19,6 @@
                     </div>
                 </div>
             @endif
-
-            {{-- Pesan Error (Merah) --}}
             @if (session('error'))
                 <div class="mb-4 bg-red-50 border-l-4 border-red-400 p-4" role="alert">
                     <div class="flex">
@@ -33,13 +30,12 @@
                     </div>
                 </div>
             @endif
-            {{-- =================== BLOK NOTIFIKASI BARU SELESAI DI SINI =================== --}}
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-medium text-gray-900">Daftar Riwayat Anda</h3>
-                        <a href="{{ route('mahasiswa.pengajuan.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <a href="{{ route('mahasiswa.pengajuan.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
                             Ajukan Konseling Baru
                         </a>
                     </div>
@@ -76,7 +72,11 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <a href="{{ route('mahasiswa.riwayat.show', $konseling->id_konseling) }}" class="text-indigo-600 hover:text-indigo-900">Lihat Detail</a>
+                                            @if ($konseling->status_konseling == 'Perlu Revisi')
+                                                <a href="{{ route('mahasiswa.pengajuan.edit', $konseling->id_konseling) }}" class="text-yellow-600 hover:text-yellow-900 font-bold">Revisi & Kirim Ulang</a>
+                                            @else
+                                                <a href="{{ route('mahasiswa.riwayat.show', $konseling->id_konseling) }}" class="text-indigo-600 hover:text-indigo-900">Lihat Detail</a>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty

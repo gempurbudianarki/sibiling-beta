@@ -2,42 +2,40 @@
 
 namespace App\Http\Controllers\DosenKonseling;
 
-use App\Models\Konseling;
-use Illuminate\Http\Request;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use App\Http\Controllers\Controller;
-use Illuminate\View\View;
+use App\Models\Konseling;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 
 class KasusController extends Controller
 {
-    public function index(Request $request): View
+    /**
+     * Menampilkan semua kasus yang sudah selesai atau sedang berjalan.
+     */
+    public function index()
     {
-        $search = $request->input('search');
+        // Ambil semua kasus yang sudah melewati tahap persetujuan
+        $riwayatKasus = Konseling::whereIn('status_konseling', ['Terjadwal', 'Butuh Sesi Lanjutan', 'Selesai'])
+            ->with('mahasiswa.user')
+            ->latest('tgl_pengajuan')
+            ->paginate(10);
 
-        $kasusQuery = Konseling::with('mahasiswa')
-            ->whereHas('jadwal', function (Builder $query) {
-                $query->whereHas('hasilKonseling');
-            });
-
-        if ($search) {
-            $kasusQuery->whereHas('mahasiswa', function (Builder $query) use ($search) {
-                $query->where('nm_mhs', 'like', "%{$search}%")
-                      ->orWhere('nim', 'like', "%{$search}%");
-            });
-        }
-
-        // === PERUBAHAN DI SINI ===
-        $riwayatKasus = $kasusQuery->where('status_konseling', 'Selesai')
-                   ->orderBy('tgl_pengajuan', 'desc')
-                   ->paginate(15);
-
-        // Dan di sini
         return view('dosen-konseling.kasus.index', compact('riwayatKasus'));
     }
 
-    public function show(Konseling $konseling): View
+    /**
+     * Menampilkan file kasus yang komprehensif.
+     */
+    public function show(Konseling $konseling)
     {
-        $konseling->load('mahasiswa', 'jadwal.hasilKonseling', 'jadwal.dosenKonseling');
+        // Eager load semua data yang dibutuhkan untuk ditampilkan
+        $konseling->load([
+            'mahasiswa.user', 
+            'mahasiswa.prodi', 
+            'dosenWali.user',
+            'jadwalSesi.hasilKonseling' // Memuat semua sesi dan hasilnya
+        ]);
+
         return view('dosen-konseling.kasus.show', compact('konseling'));
     }
 }

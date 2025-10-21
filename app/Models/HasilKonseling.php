@@ -12,17 +12,23 @@ class HasilKonseling extends Model
 
     protected $table = 'hasil_konseling';
     protected $primaryKey = 'id_hasil';
-    public $incrementing = true;
+    public $timestamps = false;
 
     protected $fillable = [
         'id_jadwal',
-        'catatan_sesi',
+        'diagnosis',
+        'prognosis',
         'rekomendasi',
-        'status_akhir',
+        'evaluasi',
     ];
 
+    // ================== RELASI BARU DITAMBAHKAN DI SINI ==================
+    /**
+     * Get the jadwal konseling that owns the hasil.
+     */
     public function jadwalKonseling(): BelongsTo
     {
         return $this->belongsTo(JadwalKonseling::class, 'id_jadwal', 'id_jadwal');
     }
+    // ====================================================================
 }

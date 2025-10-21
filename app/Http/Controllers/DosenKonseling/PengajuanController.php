@@ -13,12 +13,17 @@ class PengajuanController extends Controller
      */
     public function index()
     {
-        $pengajuanBaru = Konseling::where('status_konseling', 'Menunggu Verifikasi')
+        // ================== PERBAIKAN QUERY DI SINI ==================
+        // Ambil semua pengajuan yang statusnya butuh tindakan:
+        // 'Menunggu Verifikasi' (butuh diverifikasi)
+        // 'Disetujui' (butuh dibuatkan jadwal)
+        $daftarTugas = Konseling::whereIn('status_konseling', ['Menunggu Verifikasi', 'Disetujui'])
                                   ->with('mahasiswa.user')
                                   ->latest('tgl_pengajuan')
                                   ->get();
+        // =============================================================
 
-        return view('dosen-konseling.pengajuan.index', compact('pengajuanBaru'));
+        return view('dosen-konseling.pengajuan.index', compact('daftarTugas'));
     }
 
     /**
@@ -31,13 +36,12 @@ class PengajuanController extends Controller
     }
 
     /**
-     * Memperbarui status pengajuan (misal: Disetujui, Ditolak, Perlu Revisi).
+     * Memperbarui status pengajuan.
      */
     public function updateStatus(Request $request, Konseling $pengajuan)
     {
         $request->validate([
             'status_konseling' => 'required|string|in:Disetujui,Ditolak,Perlu Revisi',
-            // Alasan wajib diisi jika statusnya 'Ditolak'
             'alasan_penolakan' => 'nullable|string|required_if:status_konseling,Ditolak',
         ]);
 
