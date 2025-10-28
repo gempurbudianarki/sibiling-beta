@@ -1,206 +1,221 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center">
-            <div class="flex-shrink-0">
-                <svg class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-            </div>
-            <div class="ml-3">
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ __('Form Pengajuan Konseling') }}
-                </h2>
-                <p class="text-sm text-gray-600 mt-1">Layanan Bimbingan dan Konseling</p>
-            </div>
-        </div>
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Buat Pengajuan Konseling Baru') }}
+        </h2>
     </x-slot>
 
-    <div class="py-8">
+    <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            {{-- Notifikasi Error --}}
-            @if ($errors->any())
-                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm" role="alert">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-semibold text-red-800">Oops! Terjadi kesalahan</h3>
-                            <div class="mt-1 text-sm text-red-700">
-                                <ul class="list-disc list-inside space-y-1">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    
+                    {{-- Form untuk 'store' --}}
+                    <form method="POST" action="{{ route('mahasiswa.pengajuan.store') }}">
+                        @csrf
+
+                        {{-- ========================================================== --}}
+                        {{-- BAGIAN A: DATA DIRI MAHASISWA --}}
+                        {{-- ========================================================== --}}
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 border-b pb-2">
+                            Bagian A: Data Diri Mahasiswa
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <x-input-label for="nama_mahasiswa" :value="__('Nama Lengkap')" />
+                                <x-text-input id="nama_mahasiswa" class="block mt-1 w-full bg-gray-100 dark:bg-gray-700" type="text" value="{{ $mahasiswa->user->name }}" readonly />
+                            </div>
+
+                            <div>
+                                <x-input-label for="nim_mahasiswa" :value="__('NIM')" />
+                                <x-text-input id="nim_mahasiswa" class="block mt-1 w-full bg-gray-100 dark:bg-gray-700" type="text" value="{{ $mahasiswa->nim }}" readonly />
+                            </div>
+
+                            <div>
+                                <x-input-label for="prodi_mahasiswa" :value="__('Program Studi')" />
+                                <x-text-input id="prodi_mahasiswa" class="block mt-1 w-full bg-gray-100 dark:bg-gray-700" type="text" value="{{ $mahasiswa->prodi->nama_prodi ?? 'Prodi Tidak Ditemukan' }}" readonly />
+                            </div>
+
+                            <div>
+                                <x-input-label for="email_mahasiswa" :value="__('Email')" />
+                                <x-text-input id="email_mahasiswa" class="block mt-1 w-full bg-gray-100 dark:bg-gray-700" type="email" value="{{ $mahasiswa->email }}" readonly />
                             </div>
                         </div>
-                    </div>
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm" role="alert">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        <div class="mt-4">
+                            <x-input-label for="no_hp_mahasiswa" :value="__('No. HP/WA (Aktif)')" />
+                            <x-text-input id="no_hp_mahasiswa" class="block mt-1 w-full" type="text" name="no_hp_mahasiswa" :value="old('no_hp_mahasiswa', $mahasiswa->no_hp)" placeholder="Contoh: 081234567890" />
+                            <x-input-error :messages="$errors->get('no_hp_mahasiswa')" class="mt-2" />
                         </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-semibold text-red-800">Gagal!</h3>
-                            <p class="text-sm text-red-700 mt-1">{{ session('error') }}</p>
-                        </div>
-                    </div>
-                </div>
-            @endif
+                        
+                        {{-- Divider --}}
+                        <hr class="my-8 border-gray-300 dark:border-gray-700">
 
-            <div class="mb-8">
-                <div class="border border-gray-200 rounded-xl p-4">
-                    <p class="text-center font-semibold text-gray-800">Formulir Pengajuan Bimbingan Konseling</p>
+                        {{-- ========================================================== --}}
+                        {{-- BAGIAN B: STATUS & JENIS PERMASALAHAN --}}
+                        {{-- ========================================================== --}}
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 border-b pb-2">
+                            Bagian B: Status & Jenis Permasalahan
+                        </h3>
+
+                        <div class="mt-4">
+                            <x-input-label :value="__('Status Konseli/Klien')" class="mb-2" />
+                            <div class="flex flex-col sm:flex-row sm:space-x-4">
+                                <label class="inline-flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-md mb-2 sm:mb-0">
+                                    <input type="radio" name="tipe_konseli" value="Konseli Baru (belum pernah)" 
+                                        class="text-indigo-600 border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-indigo-500"
+                                        {{ old('tipe_konseli') == 'Konseli Baru (belum pernah)' ? 'checked' : '' }}>
+                                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Konseli Baru (belum pernah)</span>
+                                </label>
+                                <label class="inline-flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-md">
+                                    <input type="radio" name="tipe_konseli" value="Konseli Lama (sudah pernah)" 
+                                        class="text-indigo-600 border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-indigo-500"
+                                        {{ old('tipe_konseli') == 'Konseli Lama (sudah pernah)' ? 'checked' : '' }}>
+                                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Konseli Lama (sudah pernah)</span>
+                                </label>
+                            </div>
+                             <x-input-error :messages="$errors->get('tipe_konseli')" class="mt-2" />
+                        </div>
+
+                        <div class="mt-6">
+                             <x-input-label :value="__('Jenis Permasalahan (Pilih satu atau lebih)')" class="mb-2"/>
+                             @php $old_jenis = old('jenis_permasalahan', []); @endphp
+                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                @foreach(['Sosial', 'Belajar', 'Karir', 'Pribadi'] as $jenis)
+                                <label class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-md">
+                                    <input type="checkbox" name="jenis_permasalahan[]" value="{{ $jenis }}"
+                                           class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                           {{ in_array($jenis, $old_jenis) ? 'checked' : '' }}>
+                                    <span class="ms-3 text-sm text-gray-600 dark:text-gray-400">{{ $jenis }}</span>
+                                </label>
+                                @endforeach
+                             </div>
+                             <x-input-error :messages="$errors->get('jenis_permasalahan')" class="mt-2" />
+                        </div>
+
+                        {{-- Divider --}}
+                        <hr class="my-8 border-gray-300 dark:border-gray-700">
+
+                        {{-- ========================================================== --}}
+                        {{-- BAGIAN C: DETAIL PERMASALAHAN (DUA TEXTAREA) --}}
+                        {{-- ========================================================== --}}
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 border-b pb-2">
+                            Bagian C: Detail Permasalahan
+                        </h3>
+
+                        <div class="mt-4">
+                            <x-input-label for="deskripsi_masalah" :value="__('Jelaskan secara singkat kondisi Anda saat ini (keluhan/permasalahan)')" />
+                            <textarea name="deskripsi_masalah" id="deskripsi_masalah" rows="6" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('deskripsi_masalah') }}</textarea>
+                            <x-input-error :messages="$errors->get('deskripsi_masalah')" class="mt-2" />
+                        </div>
+
+                        <div class="mt-4">
+                            <x-input-label for="tujuan_konseling" :value="__('Jelaskan secara singkat tujuan Anda membutuhkan layanan bimbingan konseling')" />
+                            <textarea name="tujuan_konseling" id="tujuan_konseling" rows="4" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">{{ old('tujuan_konseling') }}</textarea>
+                            <x-input-error :messages="$errors->get('tujuan_konseling')" class="mt-2" />
+                        </div>
+
+                         {{-- Divider --}}
+                        <hr class="my-8 border-gray-300 dark:border-gray-700">
+
+                        {{-- ========================================================== --}}
+                        {{-- BAGIAN D: ASESMEN K10 (SESUAI PERMINTAAN) --}}
+                        {{-- ========================================================== --}}
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 border-b pb-2">
+                            Bagian D: Asesmen Kondisi Psikologis (K10 Modifikasi)
+                        </h3>
+                         <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">
+                            Pilih jawaban yang paling sesuai dengan kondisi Anda dalam **satu bulan terakhir**.
+                        </p>
+
+                        @php
+                            $old_k10 = old('asesmen_k10', []);
+                            $k10_questions = [
+                                1 => 'Seberapa sering Anda merasa lelah tanpa sebab yang jelas?',
+                                2 => 'Seberapa sering Anda merasa cemas atau khawatir?',
+                                3 => 'Seberapa sering Anda merasa sangat gugup sehingga tidak ada yang dapat menenangkan Anda?',
+                                4 => 'Seberapa sering Anda merasa putus asa?',
+                                5 => 'Seberapa sering Anda merasa gelisah atau tidak tenang?',
+                                6 => 'Seberapa sering Anda merasa sangat gelisah sehingga tidak dapat duduk tenang?',
+                                7 => 'Seberapa sering Anda merasa tertekan?',
+                                8 => 'Seberapa sering Anda merasa perlu berusaha keras untuk melakukan segala hal?',
+                                9 => 'Seberapa sering Anda merasa sangat sedih sehingga tidak ada yang dapat menghibur Anda?',
+                                10 => 'Seberapa sering Anda merasa tidak berharga atau tidak berarti?',
+                            ];
+                            $k10_options = [
+                                'Tidak pernah',
+                                'Jarang',
+                                'Kadang-kadang',
+                                'Hampir Sepanjang waktu',
+                                'Sepanjang waktu',
+                            ];
+                        @endphp
+                        
+                        <div class="space-y-6">
+                            @foreach ($k10_questions as $index => $question)
+                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-md">
+                                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300 mb-3">
+                                    {{ $index }}. {{ $question }}
+                                </label>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-x-4 gap-y-2">
+                                     @foreach ($k10_options as $option)
+                                        <label class="inline-flex items-center">
+                                            <input type="radio" name="asesmen_k10[{{ $index - 1 }}]" value="{{ $option }}" 
+                                                class="text-indigo-600 border-gray-300 dark:border-gray-700 dark:bg-gray-900 focus:ring-indigo-500"
+                                                {{ (isset($old_k10[$index - 1]) && $old_k10[$index - 1] == $option) ? 'checked' : '' }}>
+                                            <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ $option }}</span>
+                                        </label>
+                                     @endforeach
+                                </div>
+                                <x-input-error :messages="$errors->get('asesmen_k10.' . ($index - 1))" class="mt-2" />
+                            </div>
+                            @endforeach
+                        </div>
+                         <x-input-error :messages="$errors->get('asesmen_k10')" class="mt-2" />
+
+                        {{-- ================================================== --}}
+                        {{-- BAGIAN E: PERSETUJUAN (SESUAI SOP) --}}
+                        {{-- ================================================== --}}
+                        <hr class="my-8 border-gray-300 dark:border-gray-700">
+
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 border-b pb-2">
+                            Bagian E: Persetujuan / Informed Consent
+                        </h3>
+                        <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-md space-y-4 text-sm text-gray-700 dark:text-gray-300">
+                            <p>Saya yang bertanda tangan di atas menyatakan <strong>SETUJU</strong> dan <strong>BERSEDIA</strong> untuk terlibat dan berpartisipasi aktif dalam proses layanan bimbingan konseling yang diselenggarakan oleh unit perlayanan bimbingan konseling.</p>
+                            <p>Dalam kegiatan ini, setelah saya mengetahui tujuan, manfaat dari kegiatan layanan bimbingan konseling, maka saya telah menyadari, memahami, dan menerima bahwa:</p>
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li>Saya terlibat penuh dan aktif selama proses layanan bimbingan konseling berlangsung.</li>
+                                <li>Saya bersedia untuk memberikan segala informasi mengenai permasalahan yang sedang saya alami dengan sejujur-jujurnya.</li>
+                                <li>Identitas dan informasi yang saya berikan bersifat <strong>DIRAHASIAKAN</strong> dan tidak akan disampaikan secara terbuka kepada umum.</li>
+                                <li>Saya bersedia apabila dibutuhkan untuk perekaman percakapan selama proses layanan bimbingan konseling, guna memperoleh dokumen dan rekapan tersebut bersifat <strong>DIRAHASIAKAN</strong>.</li>
+                                <li>Guna menunjang kelancaran proses layanan bimbingan konseling, maka segala hal yang terkait dengan waktu dan tempat akan disepakati bersama.</li>
+                            </ol>
+                            <p>Dalam menandatangani lembar ini, saya <strong>TIDAK ADA PAKSAAN</strong> dari pihak manapun sehingga saya bersedia untuk mengikuti proses layanan bimbingan konseling ini dari awal kegiatan sampai berakhirnya kegiatan dan menerima segala hal yang terkait dengan pelaksaan kegiatan ini.</p>
+                        </div>
+                        
+                        <div class="block mt-4">
+                            <label for="persetujuan" class="inline-flex items-center">
+                                <input id="persetujuan" type="checkbox" name="persetujuan" value="1" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800">
+                                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Saya telah membaca dan menyetujui pernyataan di atas.') }}</span>
+                            </label>
+                            {{-- Tampilkan error validasi jika checkbox tidak dicentang --}}
+                            <x-input-error :messages="$errors->get('persetujuan')" class="mt-2" />
+                        </div>
+
+                        {{-- Tombol Submit --}}
+                        <div class="flex items-center justify-end mt-8">
+                            <a href="{{ route('mahasiswa.riwayat.index') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+                                Batalkan
+                            </a>
+                            <x-primary-button class="ms-4">
+                                {{ __('Kirim Pengajuan') }}
+                            </x-primary-button>
+                        </div>
+                    </form>
+
                 </div>
             </div>
-
-            <form action="{{ route('mahasiswa.pengajuan.store') }}" method="POST" x-data="{ submitting: false }" @submit="submitting = true">
-                @csrf
-                
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
-                    <div class="bg-gray-50 px-6 py-4 border-b">
-                        <h3 class="text-lg font-semibold text-gray-800">Informasi Pengajuan</h3>
-                        <p class="text-gray-500 text-sm mt-1">
-                            Silakan isi formulir di bawah ini dengan sejujur-jujurnya. Kerahasiaan data Anda terjamin.
-                        </p>
-                    </div>
-
-                    <div class="p-6 space-y-6">
-                        <div class="space-y-3">
-                            <label for="bidang_layanan" class="block text-sm font-semibold text-gray-900">
-                                Bidang Layanan Konseling <span class="text-red-500">*</span>
-                            </label>
-                            <select id="bidang_layanan" name="bidang_layanan" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-white shadow-sm" required>
-                                <option value="" disabled {{ old('bidang_layanan') ? '' : 'selected' }}>-- Pilih Bidang Layanan --</option>
-                                <option value="pribadi" {{ old('bidang_layanan') == 'pribadi' ? 'selected' : '' }} class="py-2">Pribadi</option>
-                                <option value="sosial" {{ old('bidang_layanan') == 'sosial' ? 'selected' : '' }} class="py-2">Sosial</option>
-                                <option value="belajar" {{ old('bidang_layanan') == 'belajar' ? 'selected' : '' }} class="py-2">Belajar</option>
-                                <option value="karir" {{ old('bidang_layanan') == 'karir' ? 'selected' : '' }} class="py-2">Karir</option>
-                            </select>
-                        </div>
-
-                        <div class="space-y-3">
-                            <label class="block text-sm font-semibold text-gray-900">
-                                Apakah Anda pernah melakukan konseling di UPBK UBBG sebelumnya? <span class="text-red-500">*</span>
-                            </label>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <label class="relative flex cursor-pointer">
-                                    <input type="radio" class="sr-only peer" name="jenis_konseli" value="baru" {{ old('jenis_konseli', 'baru') == 'baru' ? 'checked' : '' }}>
-                                    <div class="w-full p-4 border-2 border-gray-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 transition-all duration-200">
-                                        <div class="flex items-center">
-                                            <div class="w-4 h-4 border-2 border-gray-300 rounded-full peer-checked:border-indigo-500 peer-checked:bg-indigo-500 transition-all duration-200 mr-3"></div>
-                                            <span class="text-sm font-medium text-gray-900">Belum Pernah (Konseli Baru)</span>
-                                        </div>
-                                    </div>
-                                </label>
-                                <label class="relative flex cursor-pointer">
-                                    <input type="radio" class="sr-only peer" name="jenis_konseli" value="lama" {{ old('jenis_konseli') == 'lama' ? 'checked' : '' }}>
-                                    <div class="w-full p-4 border-2 border-gray-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 transition-all duration-200">
-                                        <div class="flex items-center">
-                                            <div class="w-4 h-4 border-2 border-gray-300 rounded-full peer-checked:border-indigo-500 peer-checked:bg-indigo-500 transition-all duration-200 mr-3"></div>
-                                            <span class="text-sm font-medium text-gray-900">Sudah Pernah (Konseli Lama)</span>
-                                        </div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="space-y-3">
-                            <label for="tujuan_konseling" class="block text-sm font-semibold text-gray-900">
-                                Jelaskan secara singkat tujuan Anda membutuhkan layanan bimbingan konseling <span class="text-red-500">*</span>
-                            </label>
-                            <textarea id="tujuan_konseling" name="tujuan_konseling" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 resize-none shadow-sm" placeholder="Contoh: Saya ingin mendapatkan bantuan dalam mengelola stres akademik..." required>{{ old('tujuan_konseling') }}</textarea>
-                        </div>
-
-                        <div class="space-y-3">
-                            <label for="deskripsi_masalah" class="block text-sm font-semibold text-gray-900">
-                                Jelaskan secara singkat kondisi Anda saat ini (keluhan/permasalahan) <span class="text-red-500">*</span>
-                            </label>
-                            <textarea id="deskripsi_masalah" name="deskripsi_masalah" rows="5" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 resize-none shadow-sm" placeholder="Ceritakan secara detail apa yang sedang Anda alami..." required>{{ old('deskripsi_masalah') }}</textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="bg-gray-50 px-6 py-4 border-b">
-                        <h3 class="text-lg font-semibold text-gray-800">Asesmen Singkat</h3>
-                        <p class="text-gray-500 text-sm mt-1">
-                            Pertanyaan berikut menanyakan bagaimana perasaan Anda dalam sebulan terakhir. Pilih jawaban yang paling sesuai.
-                        </p>
-                    </div>
-
-                    @php
-                        $questions = [
-                            1 => 'Dalam sebulan terakhir ini, seberapa sering Anda merasa lelah tanpa sebab yang jelas?',
-                            2 => 'Dalam sebulan terakhir ini, seberapa sering Anda merasa cemas atau khawatir?',
-                            3 => 'Dalam sebulan terakhir ini, seberapa sering Anda merasa sangat gugup sehingga tidak ada yang dapat menenangkan Anda?',
-                            4 => 'Dalam sebulan terakhir ini, seberapa sering Anda merasa putus asa?',
-                            5 => 'Dalam sebulan terakhir ini, seberapa sering Anda merasa gelisah atau tidak tenang?',
-                            6 => 'Dalam sebulan terakhir ini, seberapa sering Anda merasa sangat gelisah sehingga tidak dapat duduk tenang?',
-                            7 => 'Dalam sebulan terakhir ini, seberapa sering Anda merasa tertekan?',
-                            8 => 'Dalam sebulan terakhir ini, seberapa sering Anda merasa perlu berusaha keras untuk melakukan segala hal?',
-                            9 => 'Dalam sebulan terakhir ini, seberapa sering Anda merasa sangat sedih sehingga tidak ada yang dapat menghibur Anda?',
-                            10 => 'Dalam sebulan terakhir ini, seberapa sering Anda merasa tidak berharga atau tidak berarti?',
-                        ];
-                        $answers = ['Tidak Pernah', 'Jarang', 'Kadang-kadang', 'Hampir Sepanjang Waktu', 'Sepanjang Waktu'];
-                    @endphp
-
-                    <div class="p-6 space-y-8">
-                        @foreach ($questions as $index => $question)
-                        <div class="bg-gray-50 rounded-xl p-6 transition-all duration-200 hover:bg-gray-100">
-                            <fieldset>
-                                <legend class="text-sm font-semibold text-gray-900 mb-4 flex items-start">
-                                    <span class="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full text-xs flex items-center justify-center mr-3 mt-0.5">{{ $index }}</span>
-                                    {{ $question }}
-                                </legend>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-                                    @foreach ($answers as $answer)
-                                    <label class="relative flex cursor-pointer">
-                                        <input type="radio" class="sr-only peer" name="assessment[{{ $index }}]" value="{{ $answer }}" {{ old('assessment.' . $index) == $answer ? 'checked' : '' }} required>
-                                        <div class="w-full p-3 text-center border-2 border-gray-200 rounded-lg peer-checked:border-indigo-500 peer-checked:bg-indigo-500 peer-checked:text-white transition-all duration-200 hover:border-gray-300">
-                                            <span class="text-sm font-medium">{{ $answer }}</span>
-                                        </div>
-                                    </label>
-                                    @endforeach
-                                </div>
-                            </fieldset>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <a href="{{ route('dashboard') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-white border border-gray-300 rounded-xl font-semibold text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 text-sm">
-                        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        Kembali ke Dashboard
-                    </a>
-                    <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 border border-transparent rounded-xl font-semibold text-white uppercase tracking-widest shadow-sm hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-200 text-sm" :disabled="submitting">
-                        <span x-show="!submitting" class="flex items-center">
-                            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                            </svg>
-                            Kirim Pengajuan
-                        </span>
-                        <span x-show="submitting" class="flex items-center">
-                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Mengirim...
-                        </span>
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 </x-app-layout>

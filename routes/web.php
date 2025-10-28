@@ -80,14 +80,22 @@ Route::middleware(['auth', 'verified', 'role:mahasiswa'])->prefix('mahasiswa')->
     // Rute dashboard mahasiswa opsional
     // Route::get('/dashboard', [MahasiswaDashboardController::class, 'index'])->name('dashboard');
 
+    // Rute pengajuan mandiri (alur lama, JANGAN DIUBAH)
     Route::get('/pengajuan/create', [MahasiswaPengajuanController::class, 'create'])->name('pengajuan.create');
     Route::post('/pengajuan', [MahasiswaPengajuanController::class, 'store'])->name('pengajuan.store');
 
-    // ======== RUTE YANG LO MINTA TAMBAH (AMAN) ========
+    // --- RUTE BARU UNTUK MELENGKAPI DATA DARI DOSEN WALI ---
+    // Rute untuk menampilkan form melengkapi
+    Route::get('/pengajuan/{konseling}/lengkapi', [MahasiswaPengajuanController::class, 'lengkapi'])->name('pengajuan.lengkapi');
+    // Rute untuk menyimpan (submit) form melengkapi
+    Route::put('/pengajuan/{konseling}/lengkapi', [MahasiswaPengajuanController::class, 'updateLengkapan'])->name('pengajuan.updateLengkapan');
+    // --- BATAS RUTE BARU ---
+
+    // Rute untuk revisi (alur lama, JANGAN DIUBAH)
     Route::get('/pengajuan/{konseling}/edit', [MahasiswaPengajuanController::class, 'edit'])->name('pengajuan.edit');
     Route::put('/pengajuan/{konseling}', [MahasiswaPengajuanController::class, 'update'])->name('pengajuan.update');
-    // ==================================================
 
+    // Rute riwayat
     Route::get('/riwayat', [MahasiswaRiwayatController::class, 'index'])->name('riwayat.index');
     Route::get('/riwayat/{konseling}', [MahasiswaRiwayatController::class, 'show'])->name('riwayat.show');
 });

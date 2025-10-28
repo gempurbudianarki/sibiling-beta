@@ -39,12 +39,17 @@ class RekomendasiController extends Controller
 
         $dosenWali = Auth::user()->dosen;
 
-        // ================== PENYIMPANAN DATA BARU YANG LENGKAP ==================
+        // ================== PENYIMPANAN DATA (ALUR BARU) ==================
         Konseling::create([
             'nim_mahasiswa' => $request->nim_mahasiswa,
             'id_dosen_wali' => $dosenWali->email_dos,
             'tgl_pengajuan' => Carbon::now(),
-            'status_konseling' => 'Menunggu Verifikasi',
+            
+            // --- PERUBAHAN KRUSIAL ADA DI SINI ---
+            // Mengubah status agar masuk ke antrian mahasiswa, bukan Dosen Konseling.
+            'status_konseling' => 'Menunggu Kelengkapan Mahasiswa', 
+            // --- BATAS PERUBAHAN ---
+
             'sumber_pengajuan' => 'dosen_pa',
             // Menyimpan data dari form SOP
             'aspek_permasalahan' => $request->aspek_permasalahan, // Disimpan sebagai JSON/array
@@ -56,7 +61,8 @@ class RekomendasiController extends Controller
         ]);
         // ========================================================================
 
-        return redirect()->route('dosen-pembimbing.mahasiswa')->with('success', 'Rekomendasi konseling untuk mahasiswa telah berhasil dikirim.');
+        // --- Perubahan pesan sukses untuk mencerminkan alur baru ---
+        return redirect()->route('dosen-pembimbing.mahasiswa')->with('success', 'Rekomendasi konseling telah berhasil dikirim ke mahasiswa untuk dilengkapi.');
     }
 
     public function edit($id)
