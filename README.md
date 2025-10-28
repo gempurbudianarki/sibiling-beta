@@ -25,22 +25,44 @@ Sistem ini dirancang dengan 4 peran (aktor) utama, masing-masing dengan alur ker
 
 ### 2. Alur Pengajuan Konseling
 
-```mermaid
 flowchart TD
-    A[🧑‍🎓 Mahasiswa Ajukan Konseling] -->|Jalur A| B[⏳ Menunggu Verifikasi]
-    C[👨‍🏫 Dosen PA Rekomendasi] -->|Jalur B| B
-    B --> D{👩‍⚕️ Verifikasi Data?}
-    D -->|Tidak Lengkap| E[🔁 Revisi Diperlukan]
-    D -->|Lengkap| F[✅ Terverifikasi]
-    F --> G[📅 Buat Jadwal Konseling]
-    G --> H[📌 Status Terjadwal + Notifikasi]
-    H --> I[💬 Sesi Konseling]
-    I --> J[📝 Isi Hasil Konseling]
-    J -->|Perlu Lanjutan| G
-    J -->|Tuntas| K[🏁 Selesai]
-```
+    %% ==== Alur Pengajuan Konseling SIBILING UBBG ====
 
----
+    %% --- Pengajuan Awal ---
+    subgraph A1[Alur Pengajuan Awal]
+        A[🧑‍🎓 Mahasiswa Ajukan Mandiri] -->|Isi Form Lengkap| B(📥 Menunggu Verifikasi Dosen Konseling)
+        C[👨‍🏫 Dosen PA Rekomendasi] -->|Isi Form Rekomendasi| D(📥 Menunggu Kelengkapan Mahasiswa)
+        D --> E[🧑‍🎓 Mahasiswa Lengkapi Form]
+        E --> B
+    end
+
+    %% --- Verifikasi ---
+    subgraph A2[Proses Verifikasi]
+        B --> F{👩‍⚕️ Verifikasi oleh Dosen Konseling}
+        F -- ✅ Lengkap & Valid --> G[✅ Disetujui]
+        F -- ✏️ Perlu Perbaikan --> H[📝 Revisi oleh Mahasiswa]
+        F -- ❌ Tidak Sesuai --> Z[⛔ Ditolak]
+        H --> E
+    end
+
+    %% --- Proses Konseling ---
+    subgraph A3[Proses Konseling]
+        G --> I[📅 Penjadwalan Sesi Konseling]
+        I --> J[📩 Notifikasi ke Mahasiswa]
+        J --> K[💬 Sesi Konseling (Online/Offline)]
+        K --> L[📝 Pengisian Hasil Konseling]
+        L --> M{Perlu Sesi Lanjutan?}
+        M -- Ya --> I
+        M -- Tidak --> N[🏁 Kasus Selesai]
+    end
+
+    %% --- Style Warna ---
+    style D fill:#fff3b0,stroke:#333,stroke-width:2px
+    style H fill:#ffd59e,stroke:#333,stroke-width:2px
+    style Z fill:#ffadad,stroke:#333,stroke-width:2px
+    style G fill:#b7e4c7,stroke:#333,stroke-width:2px
+    style N fill:#95d5b2,stroke:#333,stroke-width:2px
+
 
 ## 🗄️ Struktur Database
 Database proyek ini dibangun dan diisi menggunakan dua perintah utama di terminal. Proses ini memastikan bahwa struktur tabel sesuai dengan aturan dari sistem informasi kampus dan semua data warisan (legacy) berhasil diimpor.
