@@ -1,3 +1,10 @@
+.
+
+-----
+
+`README.md`
+
+````markdown
 # 🎓 SIBILING UBBG - Sistem Informasi Bimbingan Konseling
 
 > 🌐 **SIBILING** adalah aplikasi web yang dirancang untuk mendigitalisasi dan mengelola alur layanan bimbingan konseling di **Universitas Bina Bangsa Getsempena (UBBG)**.  
@@ -61,3 +68,82 @@ flowchart TD
     style O fill:#ff6961,stroke:#333,stroke-width:2px; {{-- Merah muda u/ Ditolak --}}
     style F fill:#b0e57c,stroke:#333,stroke-width:2px; {{-- Hijau muda u/ Disetujui --}}
     style K fill:#77dd77,stroke:#333,stroke-width:2px; {{-- Hijau u/ Selesai --}}
+````
+
+-----
+
+## 🗄️ Struktur Database
+
+Database proyek ini dibangun dan diisi menggunakan dua perintah utama di terminal. Proses ini memastikan bahwa struktur tabel sesuai dengan aturan dari sistem informasi kampus dan semua data warisan (legacy) berhasil diimpor.
+
+### Perintah Setup Database
+
+**Membangun Struktur Tabel (Migrations):**
+
+```bash
+php artisan migrate:fresh
+```
+
+**Mengisi Data dari Kampus (Import SQL):**
+
+```bash
+mysql -u root -p sibiling_bbg < database/sql/data_final.sql 
+{{-- Tambahkan -p jika MySQL root ada password --}}
+```
+
+Tabel utama meliputi:
+
+  - `users` 👤 (Tabel auth Laravel)
+  - `mahasiswa` 🧑‍🎓 (Profil Mahasiswa)
+  - `dosen` 👨‍🏫 (Profil Dosen)
+  - `roles` & `permissions` 🛠️ (Tabel Spatie RBAC)
+  - `konseling` 📑 (Data utama kasus konseling)
+  - `jadwal_konseling` 📅 (Jadwal sesi per kasus)
+  - `hasil_konseling` 📝 (Hasil per sesi)
+  - `prodi` 🎓 (Data Program Studi)
+  - `pt` 🏢 (Data Perguruan Tinggi - opsional)
+
+-----
+
+## 📑 Struktur Menu & Fitur (Rencana Final)
+
+| Role | Menu | Fitur | Status |
+|------|------|-------|--------|
+| 🛠️ **Admin** | Dashboard | Statistik global | 🚧 |
+| | Manajemen Dosen | CRUD & Detail Dosen | ✅ |
+| | Manajemen Mahasiswa | CRUD & Detail Mahasiswa | ✅ |
+| | Pengguna & Roles | Assign Roles (Edit) | ✅ |
+| | Manajemen Konseling | Monitoring semua kasus | 🚧 |
+| | Laporan | Cetak statistik | 🚧 |
+| 👩‍⚕️ **Dosen Konseling** | Dashboard | Jadwal hari ini + pengajuan baru | 🚧 |
+| | Daftar Pengajuan | Verifikasi / Tolak / Revisi | ✅ |
+| | Jadwal Saya | Lihat Jadwal | ✅ |
+| | | Buat Jadwal | ✅ |
+| | Kasus Aktif | Lihat daftar kasus berjalan | ✅ |
+| | | Isi Hasil Konseling | ✅ |
+| 👨‍🏫 **Dosen Pembimbing** | Dashboard | Ringkasan mahasiswa bimbingan | 🚧 |
+| | Mahasiswa Bimbingan | Lihat daftar & status konseling mhs | ✅ |
+| | Rekomendasikan Konseling | Form rekomendasi | ✅ |
+| 🧑‍🎓 **Mahasiswa** | Dashboard | Status pengajuan aktif | 🚧 |
+| | Ajukan Konseling | Form pengajuan mandiri | ✅ |
+| | Riwayat Konseling | Lihat status, jadwal, hasil | ✅ |
+| | | Lengkapi/Revisi pengajuan | ✅ |
+
+*(✅ = Selesai, 🚧 = Belum/Dalam Pengembangan)*
+
+-----
+
+✨ Dibangun dengan ❤️ oleh **Tim SIBILING - UBBG**
+
+-----
+
+```
+
+**Perubahan:**
+1.  **Flowchart:** Menggunakan kode Mermaid yang baru.
+2.  **Tech Stack:** Mengupdate versi Laravel ke 12 berdasarkan `composer.json`.
+3.  **Struktur Database:** Menambahkan tabel `users` dan `permissions`, memperbaiki perintah SQL import (menambahkan `-p` jika ada password), dan merapikan daftar tabel.
+4.  **Struktur Menu:** Menambahkan kolom "Status" untuk melacak progres fitur.
+
+Silakan *copy-paste* seluruh konten di atas ke file `README.md` lo.
+```
