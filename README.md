@@ -6,7 +6,7 @@
 ---
 
 ## 🚀 Tech Stack (Teknologi yang Digunakan)
-![Laravel](https://img.shields.io/badge/Laravel-11-red?style=for-the-badge&logo=laravel)
+![Laravel](https://img.shields.io/badge/Laravel-12-red?style=for-the-badge&logo=laravel) {{-- Asumsi Laravel 12 dari composer.json --}}
 ![Blade](https://img.shields.io/badge/Frontend-Blade%20%2B%20Tailwind%20%2B%20Alpine-blue?style=for-the-badge&logo=tailwindcss)
 ![MySQL](https://img.shields.io/badge/Database-MySQL-orange?style=for-the-badge&logo=mysql)
 ![Laragon](https://img.shields.io/badge/Local-Laragon-green?style=for-the-badge)
@@ -27,71 +27,37 @@ Sistem ini dirancang dengan 4 peran (aktor) utama, masing-masing dengan alur ker
 
 ```mermaid
 flowchart TD
-    A[🧑‍🎓 Mahasiswa Ajukan Konseling] -->|Jalur A| B[⏳ Menunggu Verifikasi]
-    C[👨‍🏫 Dosen PA Rekomendasi] -->|Jalur B| B
-    B --> D{👩‍⚕️ Verifikasi Data?}
-    D -->|Tidak Lengkap| E[🔁 Revisi Diperlukan]
-    D -->|Lengkap| F[✅ Terverifikasi]
-    F --> G[📅 Buat Jadwal Konseling]
-    G --> H[📌 Status Terjadwal + Notifikasi]
-    H --> I[💬 Sesi Konseling]
-    I --> J[📝 Isi Hasil Konseling]
-    J -->|Perlu Lanjutan| G
-    J -->|Tuntas| K[🏁 Selesai]
-```
+    subgraph "Alur Pengajuan Awal"
+        A[🧑‍🎓 Mahasiswa Ajukan Mandiri] -->|Isi Form Lengkap| B(⏳ Menunggu Verifikasi);
+        C[👨‍🏫 Dosen PA Rekomendasi] -->|Isi Form Awal| L(📥 Menunggu Kelengkapan Mahasiswa);
+        L --> M[🧑‍🎓 Mahasiswa Buka & Lengkapi Form];
+        M -->|Submit Form Lengkap| B;
+    end
 
----
+    subgraph "Proses Verifikasi oleh Dosen Konseling"
+        B --> D{👩‍⚕️ Verifikasi Data?};
+        D -- OK --> F[✅ Disetujui];
+        D -- Butuh Perbaikan --> E[📝 Perlu Revisi];
+        D -- Tidak Sesuai --> O[❌ Ditolak];
+    end
 
-## 🗄️ Struktur Database
-Database proyek ini dibangun dan diisi menggunakan dua perintah utama di terminal. Proses ini memastikan bahwa struktur tabel sesuai dengan aturan dari sistem informasi kampus dan semua data warisan (legacy) berhasil diimpor.
+    subgraph "Alur Revisi (jika diperlukan)"
+        E -->|Kirim Notifikasi + Alasan| N[🧑‍🎓 Mahasiswa Buka & Revisi Form];
+        N -->|Submit Ulang Form| B; {{-- Kembali ke Verifikasi --}}
+    end
+    
+    subgraph "Proses Konseling (jika disetujui)"
+        F --> G[📅 Dosen Konseling Buat Jadwal];
+        G --> H[📌 Status Terjadwal + Notifikasi Mhs];
+        H --> I[💬 Sesi Konseling (Online/Offline)];
+        I --> J[📝 Dosen Konseling Isi Hasil Sesi];
+        J -->|Perlu Sesi Lanjutan?| Q{Keputusan};
+        Q -- Ya --> G;
+        Q -- Tidak --> K[🏁 Kasus Selesai];
+    end
 
-### Perintah Setup Database
-**Membangun Struktur Tabel (Migrations):**
-```bash
-php artisan migrate:fresh
-```
-
-**Mengisi Data dari Kampus (Import SQL):**
-```bash
-mysql -u root sibiling_bbg < database/sql/data_final.sql
-```
-
-Tabel utama meliputi:  
-- `mahasiswa` 🧑‍🎓  
-- `dosen` 👨‍🏫  
-- `roles` 🛠️  
-- `konseling` 📑  
-- `jadwal_konseling` 📅  
-- `hasil_konseling` 📝  
-- `prodi` 🎓  
-
----
-
-## 📑 Struktur Menu & Fitur (Rencana Final)
-
-| Role | Menu | Fitur |
-|------|------|-------|
-| 🛠️ **Admin** | Dashboard | Statistik global |
-| | Manajemen Dosen | Detail lengkap (60+ kolom) ✅ |
-| | Manajemen Mahasiswa | Per angkatan, detail prodi ✅ |
-| | Manajemen Konseling | Monitoring kasus 🚧 |
-| | Pengguna & Roles | Role-based access |
-| | Laporan | Cetak statistik |
-| 👩‍⚕️ **Dosen Konseling** | Dashboard | Jadwal + pengajuan baru |
-| | Daftar Pengajuan | Verifikasi / revisi |
-| | Jadwal Saya | Kelola jadwal |
-| | Kasus Aktif | Isi hasil konseling |
-| 👨‍🏫 **Dosen Pembimbing** | Dashboard | Ringkasan |
-| | Mahasiswa Bimbingan | Status konseling |
-| | Rekomendasikan Konseling | Form rekomendasi |
-| 🧑‍🎓 **Mahasiswa** | Dashboard | Status konseling |
-| | Ajukan Konseling | Form pengajuan |
-| | Riwayat Konseling | Status, jadwal, hasil |
-
----
-
-✨ Dibangun dengan ❤️ oleh **Tim SIBILING - UBBG**
-
----
-
-
+    style L fill:#fdfd96,stroke:#333,stroke-width:2px; {{-- Kuning muda u/ Menunggu Mhs --}}
+    style E fill:#ffb347,stroke:#333,stroke-width:2px; {{-- Oranye u/ Revisi --}}
+    style O fill:#ff6961,stroke:#333,stroke-width:2px; {{-- Merah muda u/ Ditolak --}}
+    style F fill:#b0e57c,stroke:#333,stroke-width:2px; {{-- Hijau muda u/ Disetujui --}}
+    style K fill:#77dd77,stroke:#333,stroke-width:2px; {{-- Hijau u/ Selesai --}}
